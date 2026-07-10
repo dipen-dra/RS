@@ -381,11 +381,6 @@ export const updateUserStatus = (id: string, isActive: boolean) =>
     body: JSON.stringify({ isActive }),
   });
 
-export const updateUserRole = (id: string, role: UserRole) =>
-  request<{ success: boolean; data: UserProfile }>(`/users/admin/${id}/role`, {
-    method: "PATCH",
-    body: JSON.stringify({ role }),
-  });
 
 export const deleteUser = (id: string) =>
   request<{ success: boolean }>(`/users/admin/${id}`, { method: "DELETE" });
