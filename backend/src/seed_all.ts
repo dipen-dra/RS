@@ -363,6 +363,7 @@ async function seed() {
   console.log("│              │ User@2024!                   │");
   console.log("└──────────────┴──────────────────────────────┘\n");
 
+  await mongoose.connection.removeAllListeners();
   await mongoose.disconnect();
 }
 
