@@ -42,6 +42,47 @@ RentalSphere is a vehicle rental platform that allows users to browse, book, and
 
 ---
 
+## 🔑 Test Credentials
+
+> Run `npm run seed:all` from the project root first to populate the database.
+
+| Role | Email | Password | Access |
+|------|-------|----------|--------|
+| 👑 **Superadmin** | `superadmin@rentalsphere.com` | `SuperAdmin@2024!` | Everything — security logs, role management, IP blocking, audit logs |
+| 🛡️ **Admin** | `admin@rentalsphere.com` | `Admin@2024!` | Fleet, bookings, queries, user activation/suspension |
+| 👤 **User** | `user@rentalsphere.com` | `User@2024!` | Browse, book, MFA setup, data export, own profile |
+
+### Extra Seeded Users (all role: user)
+
+| Name | Email | Password |
+|------|-------|----------|
+| Emily Clark | `emily.clark@example.com` | `Emily@2024!` |
+| James Wilson | `james.wilson@example.com` | `James@2024!` |
+| Priya Sharma | `priya.sharma@example.com` | `Priya@2024!` |
+| Oliver Brown | `oliver.brown@example.com` | `Oliver@2024!` |
+| Aisha Patel | `aisha.patel@example.com` | `Aisha@2024!` |
+
+### Seeded Data Summary
+
+| Collection | Count | Notes |
+|------------|-------|-------|
+| Users | 8 | 1 superadmin, 1 admin, 6 users |
+| Vehicles | 9 | 5 cars, 4 bikes across London & Edinburgh |
+| Bookings | 85 | 6 months history — completed, cancelled, active, upcoming |
+| Queries | 12 | Mix of replied and pending support tickets |
+| Notifications | 18 | booking, payment, alert types |
+| Audit Logs | 120 | All severity levels across 6 months |
+
+### Payment Test Credentials
+
+| Gateway | Credential | Value |
+|---------|-----------|-------|
+| Khalti | Test Secret Key | `test_secret_key_3f78fb6364ef4bd1b5fc670ce33a06f5` |
+| eSewa | Product Code | `EPAYTEST` |
+| eSewa | Secret | `8gBm/:&EnhH.1/q` |
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
