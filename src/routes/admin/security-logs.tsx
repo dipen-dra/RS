@@ -195,8 +195,8 @@ function SecurityLogsPage() {
               </div>
             ) : (
               <div className="divide-y divide-border">
-                {logs.map((log, i) => {
-                  const sev = severityConfig[log.severity];
+                {logs.map((log: AuditLog, i: number) => {
+                  const sev = severityConfig[log.severity as keyof typeof severityConfig];
                   const SevIcon = sev.icon;
                   const EventIcon = eventIcons[log.eventType] ?? ShieldAlert;
                   return (
@@ -278,7 +278,7 @@ function SecurityLogsPage() {
             </div>
           ) : (
             <div className="divide-y divide-border">
-              {blockedIPs.map((item) => (
+              {blockedIPs.map((item: BlockedIP) => (
                 <div key={item.ip} className="flex items-center justify-between p-4 gap-4">
                   <div>
                     <p className="font-mono text-sm font-semibold">{item.ip}</p>

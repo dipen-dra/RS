@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { BarChart3, Car, Users, Calendar, Shield, Mail } from "lucide-react";
+import { BarChart3, Car, Users, Calendar, Shield, Mail, ShieldAlert, Crown } from "lucide-react";
 import { requireAdmin } from "@/lib/guards";
 import { useAuth } from "@/lib/auth-context";
 import { cn } from "@/lib/utils";
@@ -11,7 +11,8 @@ export const Route = createFileRoute("/admin")({
   component: AdminLayout,
 });
 
-const tabs = [
+// Tabs available to admin AND superadmin
+const commonTabs = [
   { id: "overview", label: "Overview", icon: BarChart3, path: "/admin/overview" },
   { id: "vehicles", label: "Vehicles", icon: Car, path: "/admin/vehicles" },
   { id: "bookings", label: "Bookings", icon: Calendar, path: "/admin/bookings" },
@@ -19,11 +20,16 @@ const tabs = [
   { id: "queries", label: "Queries", icon: Mail, path: "/admin/queries" },
 ] as const;
 
+// Additional tabs only for superadmin
+const superAdminTabs = [
+  { id: "security-logs", label: "Security Logs", icon: ShieldAlert, path: "/admin/security-logs" },
+] as const;
+
 function AdminLayout() {
   const { user } = useAuth();
   const location = useLocation();
 
-  if (!user || user.role !== "admin") {
+  if (!user || !["admin", "superadmin"].includes(user.role)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -41,19 +47,29 @@ function AdminLayout() {
     );
   }
 
+  const isSuperAdmin = user.role === "superadmin";
+  const tabs = isSuperAdmin ? [...commonTabs, ...superAdminTabs] : commonTabs;
+
   return (
     <div className="min-h-screen bg-surface/50">
       <div className="container-page py-10">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl gradient-brand text-white shadow-[var(--shadow-glow)]">
-              <Shield className="h-5 w-5" />
+            <span className={cn(
+              "inline-flex h-10 w-10 items-center justify-center rounded-xl text-white shadow-[var(--shadow-glow)]",
+              isSuperAdmin ? "bg-amber-500" : "gradient-brand"
+            )}>
+              {isSuperAdmin ? <Crown className="h-5 w-5" /> : <Shield className="h-5 w-5" />}
             </span>
             <div>
               <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">
-                Admin Console
+                {isSuperAdmin ? "Super Admin Console" : "Admin Console"}
               </h1>
-              <p className="text-xs text-muted-foreground">Manage fleet, bookings, and customers</p>
+              <p className="text-xs text-muted-foreground">
+                {isSuperAdmin
+                  ? "Full system control — fleet, security, user management"
+                  : "Manage fleet, bookings, and customers"}
+              </p>
             </div>
           </div>
           <Link

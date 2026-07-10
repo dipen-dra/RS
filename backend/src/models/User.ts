@@ -10,7 +10,7 @@ export interface IUser extends Document {
   license?: string;
   city?: string;
   avatar?: string;
-  role: "user" | "admin";
+  role: "user" | "admin" | "superadmin";
   isActive: boolean;
   authProvider: "local" | "google";
   resetPasswordToken?: string;
@@ -40,7 +40,7 @@ const UserSchema = new Schema<IUser>(
     license: { type: String, default: "" },
     city: { type: String, default: "" },
     avatar: { type: String, default: "" },
-    role: { type: String, enum: ["user", "admin"], default: "user" },
+    role: { type: String, enum: ["user", "admin", "superadmin"], default: "user" },
     isActive: { type: Boolean, default: true },
     authProvider: { type: String, enum: ["local", "google"], default: "local" },
     resetPasswordToken: { type: String, select: false },

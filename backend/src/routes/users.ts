@@ -4,7 +4,7 @@ import { User } from "../models/User.js";
 import { Booking } from "../models/Booking.js";
 import { AuditLog } from "../models/AuditLog.js";
 import { protect, AuthRequest } from "../middleware/auth.js";
-import { adminOnly } from "../middleware/admin.js";
+import { adminOnly, superAdminOnly } from "../middleware/admin.js";
 import { upload } from "../middleware/upload.js";
 import { validatePasswordStrength, isStrongPassword } from "../utils/passwordValidator.js";
 import { logIdorAttempt, logAdminAction, logDataExport } from "../utils/securityLogger.js";
@@ -309,11 +309,11 @@ router.get("/me/export", protect, async (req: AuthRequest, res: Response): Promi
   res.json(exportData);
 });
 
-/* ── GET /api/users/admin/audit-logs (admin) ─────────────── */
+/* ── GET /api/users/admin/audit-logs (superadmin only) ────── */
 router.get(
   "/admin/audit-logs",
   protect,
-  adminOnly,
+  superAdminOnly,
   async (req: AuthRequest, res: Response): Promise<void> => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 50;
@@ -341,21 +341,21 @@ router.get(
   },
 );
 
-/* ── GET /api/users/admin/blocked-ips (admin) ────────────── */
+/* ── GET /api/users/admin/blocked-ips (superadmin) ──────── */
 router.get(
   "/admin/blocked-ips",
   protect,
-  adminOnly,
+  superAdminOnly,
   async (_req: AuthRequest, res: Response): Promise<void> => {
     res.json({ success: true, data: getBlockedIPs() });
   },
 );
 
-/* ── POST /api/users/admin/blocked-ips (admin) ───────────── */
+/* ── POST /api/users/admin/blocked-ips (superadmin) ─────── */
 router.post(
   "/admin/blocked-ips",
   protect,
-  adminOnly,
+  superAdminOnly,
   async (req: AuthRequest, res: Response): Promise<void> => {
     const { ip, reason } = req.body as { ip: string; reason?: string };
     if (!ip) {
@@ -368,11 +368,11 @@ router.post(
   },
 );
 
-/* ── DELETE /api/users/admin/blocked-ips/:ip (admin) ─────── */
+/* ── DELETE /api/users/admin/blocked-ips/:ip (superadmin) ── */
 router.delete(
   "/admin/blocked-ips/:ip",
   protect,
-  adminOnly,
+  superAdminOnly,
   async (req: AuthRequest, res: Response): Promise<void> => {
     const ip = decodeURIComponent(req.params.ip as string);
     const removed = unblockIp(ip);
@@ -382,6 +382,44 @@ router.delete(
     }
     logAdminAction(req.user!._id.toString(), "unblock_ip", ip, {}, String(req.ip));
     res.json({ success: true, message: `IP ${ip} has been unblocked.` });
+  },
+);
+
+/* ── PATCH /api/users/admin/:id/role (superadmin only) ────── */
+// Promotes or demotes a user's role — superadmin exclusive
+router.patch(
+  "/admin/:id/role",
+  protect,
+  superAdminOnly,
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    const { role } = req.body as { role: string };
+    const validRoles = ["user", "admin", "superadmin"];
+    if (!validRoles.includes(role)) {
+      res.status(400).json({ success: false, message: "Invalid role. Must be user, admin, or superadmin." });
+      return;
+    }
+    // Prevent self-demotion
+    if (req.params.id === req.user!._id.toString()) {
+      res.status(400).json({ success: false, message: "You cannot change your own role." });
+      return;
+    }
+    const target = await User.findByIdAndUpdate(
+      req.params.id,
+      { role },
+      { new: true },
+    ).select("-password");
+    if (!target) {
+      res.status(404).json({ success: false, message: "User not found." });
+      return;
+    }
+    logAdminAction(
+      req.user!._id.toString(),
+      "role_change",
+      req.params.id as string,
+      { newRole: role, previousRole: target.role },
+      req.ip ?? "",
+    );
+    res.json({ success: true, data: target, message: `Role updated to ${role}.` });
   },
 );
 

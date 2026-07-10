@@ -19,7 +19,7 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+export async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     headers: { "Content-Type": "application/json", ...(options.headers || {}) },
     credentials: "include",
@@ -41,7 +41,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 // ── Types ──────────────────────────────────────────────────
 
-export type UserRole = "user" | "admin";
+export type UserRole = "user" | "admin" | "superadmin";
 
 export interface UserProfile {
   _id: string;
@@ -201,6 +201,12 @@ export const mfaStatus = () =>
 
 export const exportUserData = () =>
   fetch("/api/users/me/export", { credentials: "include" }).then((r) => r.blob());
+
+export const updateUserRole = (id: string, role: UserRole) =>
+  request<{ success: boolean; data: UserProfile; message: string }>(`/users/admin/${id}/role`, {
+    method: "PATCH",
+    body: JSON.stringify({ role }),
+  });
 
 export const forgotPassword = (email: string) =>
   request<{ success: boolean; message: string }>("/auth/forgot-password", {
