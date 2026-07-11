@@ -18,7 +18,10 @@ import { logPaymentTampering } from "../utils/securityLogger.js";
 const router = Router();
 
 const KHALTI_SECRET_KEY =
-  process.env.KHALTI_SECRET_KEY || "test_secret_key_3f78fb6364ef4bd1b5fc670ce33a06f5";
+  process.env.KHALTI_SECRET_KEY || "Key test_secret_key_3f78fb6364ef4bd1b5fc670ce33a06f5";
+const KHALTI_INITIATE_URL = "https://dev.khalti.com/api/v2/epayment/initiate/";
+const KHALTI_VERIFY_URL =
+  process.env.KHALTI_VERIFY_URL || "https://dev.khalti.com/api/v2/epayment/lookup/";
 const ESEWA_URL = "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
 const ESEWA_SCD = "EPAYTEST";
 const ESEWA_SECRET = process.env.ESEWA_SECRET || "8gBm/:&EnhH.1/q";
@@ -66,138 +69,229 @@ export const calculateBookingTotalLegacy = async (
   return { total, vehicle, days, subtotal, serviceFee, vat, dropOffFee, discount };
 };
 
-// @desc    Verify Khalti payment
-// @route   POST /api/payment/khalti/verify
-router.post("/khalti/verify", protect, async (req: AuthRequest, res: Response): Promise<void> => {
+// @desc    Initiate Khalti ePay v2 payment
+// @route   POST /api/payment/khalti/initiate
+router.post("/khalti/initiate", protect, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { token, amount, bookingData } = req.body;
-
-    if (!token || !amount || !bookingData) {
-      res.status(400).json({ success: false, message: "Missing required fields" });
+    const { bookingData } = req.body;
+    if (!bookingData) {
+      res.status(400).json({ success: false, message: "Booking data is required" });
       return;
     }
 
-    const verificationUrl = "https://khalti.com/api/v2/payment/verify/";
+    const { total } = await calculateBookingTotalLegacy(
+      bookingData.vehicleSlug,
+      bookingData.startDate,
+      bookingData.endDate,
+      bookingData.couponCode,
+      bookingData.dropoff,
+      bookingData.pickup,
+      bookingData.insurance,
+      bookingData.addons,
+    );
 
-    // Using global fetch (Node 18+)
-    const response = await globalThis.fetch(verificationUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Key ${KHALTI_SECRET_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ token, amount }),
+    const bookingId = generateBookingId();
+
+    // Store pending booking so we can create it after verification
+    storePendingBooking(bookingId, {
+      ...bookingData,
+      userId: req.user!._id.toString(),
+      totalAmount: total,
     });
 
-    const verificationData = await response.json();
+    const CLIENT_URL = (process.env.CLIENT_URL || "http://localhost:5173").replace(/\/$/, "");
 
-    if (verificationData.idx) {
-      // Re-calculate to verify amount matches (CRITICAL SECURITY CHECK)
-      const { total, vehicle, days, subtotal, serviceFee, vat, dropOffFee, discount } =
-        await calculateBookingTotalLegacy(
-          bookingData.vehicleSlug,
-          bookingData.startDate,
-          bookingData.endDate,
-          bookingData.couponCode,
-          bookingData.dropoff,
-          bookingData.pickup,
-          bookingData.insurance,
-          bookingData.addons,
-        );
+    const payload = {
+      return_url: `${CLIENT_URL}/payment/khalti/success`,
+      website_url: CLIENT_URL,
+      amount: total * 100, // Khalti uses paisa (1 GBP = 100 paisa equivalent)
+      purchase_order_id: bookingId,
+      purchase_order_name: `RentalSphere — ${bookingData.vehicleSlug}`,
+      customer_info: {
+        name: bookingData.customerName,
+        email: bookingData.customerEmail,
+        phone: bookingData.customerPhone || "9800000001",
+      },
+    };
 
-      // SECURITY: Verify that the amount paid matches the calculated total
-      const paymentValidation = validatePaymentAmount(amount, total, 1); // 1 rupee tolerance
+    const response = await globalThis.fetch(KHALTI_INITIATE_URL, {
+      method: "POST",
+      headers: {
+        Authorization: KHALTI_SECRET_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
 
-      if (!paymentValidation.valid) {
-        logPaymentTampering(
-          req.user!._id.toString(),
-          amount,
-          total,
-          req.ip,
-          req.headers["user-agent"],
-        );
-        console.warn(`[SECURITY] Amount tampering detected! Paid: ${amount}, Calculated: ${total}`);
-        res.status(400).json({
-          success: false,
-          message: "Payment amount does not match booking total. Please try again.",
-        });
-        return;
-      }
+    const data = await response.json() as any;
 
-      logPaymentValidationAttempt(
-        req.user!._id.toString(),
-        req.ip || "unknown",
-        true,
-        amount,
-        total,
-        { method: "khalti", bookingSlug: bookingData.vehicleSlug },
-      );
-
-      // Create Booking
-      const booking = await Booking.create({
-        user: req.user!._id,
-        vehicle: vehicle._id,
-        vehicleName: vehicle.name,
-        vehicleImage: vehicle.image,
-        vehicleSlug: vehicle.slug,
-        pickup: bookingData.pickup,
-        dropoff: bookingData.dropoff || bookingData.pickup,
-        startDate: bookingData.startDate,
-        endDate: bookingData.endDate,
-        days,
-        subtotal,
-        serviceFee,
-        vat,
-        discount,
-        total,
-        insurance: bookingData.insurance,
-        addons: bookingData.addons,
-        status: "upcoming",
-        payment: "Khalti",
-        customerName: bookingData.customerName,
-        customerEmail: bookingData.customerEmail,
-        customerPhone: bookingData.customerPhone,
-        license: bookingData.license,
-        couponCode: bookingData.couponCode,
-        calculatedTotal: total,
-        serverValidated: true,
+    if (!response.ok || !data.payment_url) {
+      console.error("[Khalti Initiate Error]", data);
+      res.status(502).json({
+        success: false,
+        message: data.detail || "Failed to initiate Khalti payment",
+        error: data,
       });
-
-      Notification.create({
-        user: req.user!._id,
-        type: "booking",
-        title: "Booking Confirmed!",
-        body: `Your booking for ${vehicle.name} has been paid via Khalti.`,
-        href: "/dashboard",
-      }).catch(console.error);
-
-      // Send confirmation email
-      sendEmail({
-        to: bookingData.customerEmail,
-        subject: `Booking Confirmed: ${vehicle.name}`,
-        html: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2>Booking Confirmed!</h2>
-            <p>Hi ${bookingData.customerName},</p>
-            <p>Your booking for the <strong>${vehicle.name}</strong> has been successfully confirmed and paid.</p>
-            <p><strong>Pickup:</strong> ${new Date(bookingData.startDate).toLocaleDateString()} at ${bookingData.pickup}</p>
-            <p><strong>Total Paid:</strong> £${total.toLocaleString()}</p>
-            <p>Thank you for choosing RentalSphere!</p>
-          </div>
-        `,
-      }).catch(console.error);
-
-      res.status(200).json({ success: true, data: booking });
-    } else {
-      res
-        .status(400)
-        .json({ success: false, message: "Khalti verification failed", error: verificationData });
+      return;
     }
+
+    res.json({
+      success: true,
+      data: {
+        payment_url: data.payment_url,
+        pidx: data.pidx,
+        bookingId,
+      },
+    });
   } catch (error) {
-    console.error("Khalti verification error:", error);
+    console.error("Khalti initiate error:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
+// @desc    Verify Khalti ePay v2 payment (called from success page with pidx)
+// @route   POST /api/payment/khalti/verify
+router.post("/khalti/verify", protect, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { pidx, bookingId } = req.body;
+
+    if (!pidx || !bookingId) {
+      res.status(400).json({ success: false, message: "pidx and bookingId are required" });
+      return;
+    }
+
+    // Lookup payment status from Khalti
+    const response = await globalThis.fetch(KHALTI_VERIFY_URL, {
+      method: "POST",
+      headers: {
+        Authorization: KHALTI_SECRET_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ pidx }),
+    });
+
+    const verificationData = await response.json() as any;
+
+    if (!response.ok || verificationData.status !== "Completed") {
+      console.error("[Khalti Verify Failed]", verificationData);
+      res.status(400).json({
+        success: false,
+        message: `Khalti payment not completed. Status: ${verificationData.status || "unknown"}`,
+        error: verificationData,
+      });
+      return;
+    }
+
+    // Retrieve pending booking data
+    const bookingData = getPendingBooking(bookingId);
+    if (!bookingData) {
+      res.status(404).json({ success: false, message: "Booking session expired. Please try again." });
+      return;
+    }
+
+    const { total, vehicle, days, subtotal, serviceFee, vat, dropOffFee, discount } =
+      await calculateBookingTotalLegacy(
+        bookingData.vehicleSlug,
+        bookingData.startDate,
+        bookingData.endDate,
+        bookingData.couponCode,
+        bookingData.dropoff,
+        bookingData.pickup,
+        bookingData.insurance,
+        bookingData.addons,
+      );
+
+    // SECURITY: Verify amount paid matches calculated total
+    // Khalti amount is in paisa; convert to pounds for comparison
+    const paidAmount = verificationData.total_amount / 100;
+    const paymentValidation = validatePaymentAmount(paidAmount, total, 1);
+
+    if (!paymentValidation.valid) {
+      logPaymentTampering(
+        req.user!._id.toString(),
+        paidAmount,
+        total,
+        req.ip,
+        req.headers["user-agent"],
+      );
+      res.status(400).json({
+        success: false,
+        message: "Payment amount does not match booking total.",
+      });
+      return;
+    }
+
+    logPaymentValidationAttempt(
+      req.user!._id.toString(),
+      req.ip || "unknown",
+      true,
+      paidAmount,
+      total,
+      { method: "khalti", pidx, bookingSlug: bookingData.vehicleSlug },
+    );
+
+    // Create booking
+    const booking = await Booking.create({
+      user: req.user!._id,
+      vehicle: vehicle._id,
+      vehicleName: vehicle.name,
+      vehicleImage: vehicle.image,
+      vehicleSlug: vehicle.slug,
+      pickup: bookingData.pickup,
+      dropoff: bookingData.dropoff || bookingData.pickup,
+      startDate: bookingData.startDate,
+      endDate: bookingData.endDate,
+      days,
+      subtotal,
+      serviceFee,
+      vat,
+      discount,
+      total,
+      insurance: bookingData.insurance,
+      addons: bookingData.addons,
+      status: "upcoming",
+      payment: "Khalti",
+      customerName: bookingData.customerName,
+      customerEmail: bookingData.customerEmail,
+      customerPhone: bookingData.customerPhone,
+      license: bookingData.license,
+      couponCode: bookingData.couponCode,
+      calculatedTotal: total,
+      serverValidated: true,
+    });
+
+    deletePendingBooking(bookingId);
+
+    Notification.create({
+      user: req.user!._id,
+      type: "booking",
+      title: "Booking Confirmed!",
+      body: `Your booking for ${vehicle.name} has been paid via Khalti.`,
+      href: "/dashboard",
+    }).catch(console.error);
+
+    sendEmail({
+      to: bookingData.customerEmail,
+      subject: `Booking Confirmed: ${vehicle.name}`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Booking Confirmed!</h2>
+          <p>Hi ${bookingData.customerName},</p>
+          <p>Your booking for the <strong>${vehicle.name}</strong> has been confirmed and paid via Khalti.</p>
+          <p><strong>Pickup:</strong> ${new Date(bookingData.startDate).toLocaleDateString()} at ${bookingData.pickup}</p>
+          <p><strong>Total Paid:</strong> £${total.toLocaleString()}</p>
+          <p>Thank you for choosing RentalSphere!</p>
+        </div>
+      `,
+    }).catch(console.error);
+
+    res.status(200).json({ success: true, data: booking });
+  } catch (error) {
+    console.error("Khalti verify error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 
 // @desc    Initiate eSewa payment
 // @route   POST /api/payment/esewa/initiate

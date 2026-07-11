@@ -26,6 +26,7 @@ import {
   getVehicle,
   createBooking,
   initiateEsewaPayment,
+  request,
   ApiError,
   type Vehicle,
   type CreateBookingPayload,
@@ -335,57 +336,23 @@ function BookingFlow() {
           return; // page will navigate away
         }
 
-        // ── Khalti: load widget SDK and open payment popup ──
+        // ── Khalti: initiate v2 redirect flow ──
         if (payment === "Khalti") {
-          const khaltiConfig = {
-            publicKey: "test_public_key_dc74e0fd57cb46cd93832aee0a507256",
-            productIdentity: v.slug,
-            productName: v.name,
-            productUrl: window.location.href,
-            paymentPreference: ["MOBILE_BANKING", "KHALTI", "EBANKING", "CONNECT_IPS", "SCT"],
-            eventHandler: {
-              onSuccess: async (payload: { token: string; amount: number }) => {
-                try {
-                  const { verifyKhaltiPayment } = await import("@/lib/api");
-                  await verifyKhaltiPayment(
-                    payload.token,
-                    payload.amount,
-                    bookingPayload,
-                  );
-                  sessionStorage.removeItem(STORAGE_KEY);
-                  queryClient.invalidateQueries({ queryKey: ["myBookings"] });
-                  toast.success("Khalti payment confirmed! Booking created.");
-                  void navigate({ to: "/dashboard/bookings" });
-                } catch (e: any) {
-                  toast.error(e?.message || "Payment verification failed.");
-                } finally {
-                  setIsSubmitting(false);
-                }
-              },
-              onError: (error: unknown) => {
-                console.error("Khalti error", error);
-                toast.error("Khalti payment failed. Please try again.");
-                setIsSubmitting(false);
-              },
-              onClose: () => {
-                setIsSubmitting(false);
-              },
-            },
-          };
-          // Load Khalti checkout script dynamically
-          const loadKhalti = () =>
-            new Promise<void>((resolve, reject) => {
-              if ((window as any).KhaltiCheckout) { resolve(); return; }
-              const s = document.createElement("script");
-              s.src = "https://khalti.s3.ap-south-1.amazonaws.com/KhaltiCheckout/remote/v1.x.x/khalti-checkout.min.js";
-              s.onload = () => resolve();
-              s.onerror = () => reject(new Error("Failed to load Khalti SDK"));
-              document.head.appendChild(s);
-            });
-          await loadKhalti();
-          const checkout = new (window as any).KhaltiCheckout(khaltiConfig);
-          checkout.show({ amount: total * 100 }); // Khalti takes paisa
-          return; // submission handled in onSuccess callback
+          const res = await request<{ success: boolean; data: { payment_url: string; pidx: string; bookingId: string } }>(
+            "/payment/khalti/initiate",
+            {
+              method: "POST",
+              body: JSON.stringify({ bookingData: bookingPayload }),
+            }
+          );
+          // Store booking payload in sessionStorage for the success page
+          sessionStorage.setItem("khalti_pending", JSON.stringify({
+            bookingId: res.data.bookingId,
+            pidx: res.data.pidx,
+          }));
+          // Redirect to Khalti hosted payment page
+          window.location.href = res.data.payment_url;
+          return;
         }
 
         // ── Card / PayPal / Cash ──
