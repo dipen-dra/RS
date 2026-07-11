@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import {
   getVehicle,
   createBooking,
+  initiateEsewaPayment,
   ApiError,
   type Vehicle,
   type CreateBookingPayload,
@@ -168,7 +169,7 @@ function BookingFlow() {
   const [agree, setAgree] = useState(() => getInit("agree", false));
 
   // Step 3 — payment
-  const [payment, setPayment] = useState<"Card" | "PayPal" | "Cash">(() =>
+  const [payment, setPayment] = useState<"Card" | "PayPal" | "Cash" | "Khalti" | "eSewa">(() =>
     getInit("payment", "Cash"),
   );
   const [cardNumber, setCardNumber] = useState("");
@@ -300,10 +301,98 @@ function BookingFlow() {
 
       try {
         setIsSubmitting(true);
+
+        // ── eSewa: get signed form fields from backend then auto-submit ──
+        if (payment === "eSewa") {
+          const res = await initiateEsewaPayment(bookingPayload);
+          const d = res.data;
+          // Build and auto-submit a hidden form to eSewa
+          const form = document.createElement("form");
+          form.method = "POST";
+          form.action = d.ESEWA_URL;
+          const fields: Record<string, string> = {
+            amount: d.amount,
+            tax_amount: d.tax_amount,
+            total_amount: d.total_amount,
+            transaction_uuid: d.transaction_uuid,
+            product_code: d.product_code,
+            product_service_charge: d.product_service_charge,
+            product_delivery_charge: d.product_delivery_charge,
+            success_url: d.success_url,
+            failure_url: d.failure_url,
+            signed_field_names: d.signed_field_names,
+            signature: d.signature,
+          };
+          Object.entries(fields).forEach(([k, val]) => {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = k;
+            input.value = val;
+            form.appendChild(input);
+          });
+          document.body.appendChild(form);
+          form.submit();
+          return; // page will navigate away
+        }
+
+        // ── Khalti: load widget SDK and open payment popup ──
+        if (payment === "Khalti") {
+          const khaltiConfig = {
+            publicKey: "test_public_key_dc74e0fd57cb46cd93832aee0a507256",
+            productIdentity: v.slug,
+            productName: v.name,
+            productUrl: window.location.href,
+            paymentPreference: ["MOBILE_BANKING", "KHALTI", "EBANKING", "CONNECT_IPS", "SCT"],
+            eventHandler: {
+              onSuccess: async (payload: { token: string; amount: number }) => {
+                try {
+                  const { verifyKhaltiPayment } = await import("@/lib/api");
+                  await verifyKhaltiPayment(
+                    payload.token,
+                    payload.amount,
+                    bookingPayload,
+                  );
+                  sessionStorage.removeItem(STORAGE_KEY);
+                  queryClient.invalidateQueries({ queryKey: ["myBookings"] });
+                  toast.success("Khalti payment confirmed! Booking created.");
+                  void navigate({ to: "/dashboard/bookings" });
+                } catch (e: any) {
+                  toast.error(e?.message || "Payment verification failed.");
+                } finally {
+                  setIsSubmitting(false);
+                }
+              },
+              onError: (error: unknown) => {
+                console.error("Khalti error", error);
+                toast.error("Khalti payment failed. Please try again.");
+                setIsSubmitting(false);
+              },
+              onClose: () => {
+                setIsSubmitting(false);
+              },
+            },
+          };
+          // Load Khalti checkout script dynamically
+          const loadKhalti = () =>
+            new Promise<void>((resolve, reject) => {
+              if ((window as any).KhaltiCheckout) { resolve(); return; }
+              const s = document.createElement("script");
+              s.src = "https://khalti.s3.ap-south-1.amazonaws.com/KhaltiCheckout/remote/v1.x.x/khalti-checkout.min.js";
+              s.onload = () => resolve();
+              s.onerror = () => reject(new Error("Failed to load Khalti SDK"));
+              document.head.appendChild(s);
+            });
+          await loadKhalti();
+          const checkout = new (window as any).KhaltiCheckout(khaltiConfig);
+          checkout.show({ amount: total * 100 }); // Khalti takes paisa
+          return; // submission handled in onSuccess callback
+        }
+
+        // ── Card / PayPal / Cash ──
         if (payment === "Card" || payment === "PayPal") {
           await new Promise((resolve) => setTimeout(resolve, 1500));
         }
-        const res = await createBooking(bookingPayload);
+        await createBooking(bookingPayload);
         sessionStorage.removeItem(STORAGE_KEY);
         queryClient.invalidateQueries({ queryKey: ["myBookings"] });
         toast.success("Booking successfully confirmed!");
@@ -637,7 +726,7 @@ function BookingFlow() {
                 <p className="text-sm text-muted-foreground mt-1">
                   Secure checkout. Cancel free up to 24h before pickup.
                 </p>
-                <div className="mt-8 grid sm:grid-cols-3 gap-3">
+                <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   <PayOption
                     active={payment === "Card"}
                     onClick={() => setPayment("Card")}
@@ -661,6 +750,32 @@ function BookingFlow() {
                     title="Cash"
                     subtitle="On pickup"
                     brand="cash"
+                  />
+                  <PayOption
+                    active={payment === "Khalti"}
+                    onClick={() => setPayment("Khalti")}
+                    icon={
+                      <svg viewBox="0 0 40 40" className="h-8 w-8" fill="none">
+                        <circle cx="20" cy="20" r="20" fill="#5C2D91"/>
+                        <text x="50%" y="55%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">K</text>
+                      </svg>
+                    }
+                    title="Khalti"
+                    subtitle="Digital wallet"
+                    brand="khalti"
+                  />
+                  <PayOption
+                    active={payment === "eSewa"}
+                    onClick={() => setPayment("eSewa")}
+                    icon={
+                      <svg viewBox="0 0 40 40" className="h-8 w-8" fill="none">
+                        <circle cx="20" cy="20" r="20" fill="#60BB46"/>
+                        <text x="50%" y="55%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">eSewa</text>
+                      </svg>
+                    }
+                    title="eSewa"
+                    subtitle="Online payment"
+                    brand="esewa"
                   />
                 </div>
 
@@ -733,6 +848,34 @@ function BookingFlow() {
                     <span>
                       You will be prompted to log in to PayPal to complete the checkout safely.
                     </span>
+                  </motion.div>
+                )}
+
+                {payment === "Khalti" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-6 p-5 rounded-2xl bg-[#5C2D91]/5 border border-[#5C2D91]/20 flex items-center gap-3 text-sm"
+                  >
+                    <div className="h-10 w-10 rounded-xl bg-[#5C2D91] text-white flex items-center justify-center font-bold text-lg shrink-0">K</div>
+                    <div>
+                      <p className="font-semibold text-[#5C2D91]">Pay with Khalti</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">A Khalti payment popup will open. Complete the payment there to confirm your booking.</p>
+                    </div>
+                  </motion.div>
+                )}
+
+                {payment === "eSewa" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-6 p-5 rounded-2xl bg-[#60BB46]/5 border border-[#60BB46]/20 flex items-center gap-3 text-sm"
+                  >
+                    <div className="h-10 w-10 rounded-xl bg-[#60BB46] text-white flex items-center justify-center font-bold text-xs shrink-0">eSewa</div>
+                    <div>
+                      <p className="font-semibold text-[#4a9636]">Pay with eSewa</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">You will be redirected to eSewa's secure payment page. Return here after completing your payment.</p>
+                    </div>
                   </motion.div>
                 )}
 
@@ -1039,6 +1182,22 @@ const brandStyles = {
     logoBg: "gradient-brand",
     checkBg: "gradient-brand",
   },
+  khalti: {
+    border: "border-[#5C2D91]",
+    bg: "bg-[#5C2D91]/5",
+    shadow: "shadow-[0_0_20px_rgba(92,45,145,0.25)]",
+    hoverBorder: "hover:border-[#5C2D91]/40",
+    logoBg: "bg-[#5C2D91]",
+    checkBg: "bg-[#5C2D91]",
+  },
+  esewa: {
+    border: "border-[#60BB46]",
+    bg: "bg-[#60BB46]/5",
+    shadow: "shadow-[0_0_20px_rgba(96,187,70,0.25)]",
+    hoverBorder: "hover:border-[#60BB46]/40",
+    logoBg: "bg-[#60BB46]",
+    checkBg: "bg-[#60BB46]",
+  },
 };
 
 function PayOption({
@@ -1056,7 +1215,7 @@ function PayOption({
   logoSrc?: string;
   title: string;
   subtitle: string;
-  brand: "card" | "paypal" | "cash";
+  brand: "card" | "paypal" | "cash" | "khalti" | "esewa";
 }) {
   const s = brandStyles[brand];
   return (
