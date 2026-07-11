@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash2, CheckCircle, XCircle, Shield, Crown, User as UserIcon } from "lucide-react";
 import { getAllUsers, updateUserStatus, deleteUser, updateUserRole, type UserProfile, type UserRole } from "@/lib/api";
@@ -8,6 +8,9 @@ import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/admin/users")({
+  beforeLoad: () => {
+    throw redirect({ to: "/admin/overview" });
+  },
   component: UsersTab,
 });
 

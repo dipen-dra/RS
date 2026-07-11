@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { BarChart3, Users, ShieldAlert, Crown, Home, Settings } from "lucide-react";
+import { BarChart3, Users, ShieldAlert, Crown, Home } from "lucide-react";
 import { requireSuperAdmin } from "@/lib/guards";
 import { useAuth } from "@/lib/auth-context";
 import { cn } from "@/lib/utils";
@@ -58,12 +58,6 @@ function SuperAdminLayout() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Link
-              to="/admin"
-              className="hidden md:inline-flex h-10 px-4 items-center gap-2 rounded-full text-sm border border-border hover:bg-muted transition-colors"
-            >
-              <Settings className="h-4 w-4" /> Admin Panel
-            </Link>
             <Link
               to="/"
               className="hidden md:inline-flex h-10 px-4 items-center gap-2 rounded-full text-sm border border-border hover:bg-muted transition-colors"

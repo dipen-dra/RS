@@ -191,7 +191,7 @@ function SuperAdminOverview() {
         <h3 className="font-display text-lg font-semibold text-ink mb-4 flex items-center gap-2">
           <Crown className="h-5 w-5 text-amber-500" /> Quick Actions
         </h3>
-        <div className="grid sm:grid-cols-3 gap-3">
+        <div className="grid sm:grid-cols-2 gap-3">
           <Link to="/superadmin/users" className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border hover:border-amber-500/40 transition-colors">
             <Users className="h-5 w-5 text-amber-500" />
             <div>
@@ -204,13 +204,6 @@ function SuperAdminOverview() {
             <div>
               <p className="text-sm font-semibold">Security Logs</p>
               <p className="text-xs text-muted-foreground">Audit trail & blocked IPs</p>
-            </div>
-          </Link>
-          <Link to="/admin/overview" className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border hover:border-amber-500/40 transition-colors">
-            <Calendar className="h-5 w-5 text-amber-500" />
-            <div>
-              <p className="text-sm font-semibold">Fleet & Bookings</p>
-              <p className="text-xs text-muted-foreground">Go to admin panel</p>
             </div>
           </Link>
         </div>

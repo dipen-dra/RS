@@ -15,7 +15,6 @@ const tabs = [
   { id: "overview",  label: "Overview",  icon: BarChart3,  path: "/admin/overview" },
   { id: "vehicles",  label: "Vehicles",  icon: Car,        path: "/admin/vehicles" },
   { id: "bookings",  label: "Bookings",  icon: Calendar,   path: "/admin/bookings" },
-  { id: "users",     label: "Users",     icon: Users,      path: "/admin/users" },
   { id: "queries",   label: "Queries",   icon: Mail,       path: "/admin/queries" },
 ] as const;
 
