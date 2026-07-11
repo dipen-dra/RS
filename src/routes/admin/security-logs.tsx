@@ -14,9 +14,11 @@ import {
   Unlock,
 } from "lucide-react";
 import { request } from "@/lib/api";
+import { requireSuperAdmin } from "@/lib/guards";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/security-logs")({
+  beforeLoad: requireSuperAdmin,
   component: SecurityLogsPage,
 });
 

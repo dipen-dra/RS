@@ -54,7 +54,7 @@ export const superAdminOnly = async (
     const user = await User.findById(req.user._id);
     if (!user || user.role !== "superadmin") {
       logUnauthorizedAccess(req.path, req.user._id.toString(), req.ip);
-      logAdminAction(req.user._id.toString(), "superadmin_access_denied", req.path, {}, req.ip);
+      logAdminAction(req.user._id.toString(), "superadmin_access_denied", req.path, {}, req.ip ?? "");
       res.status(403).json({
         success: false,
         message: "Super admin access required. This action has been logged.",
