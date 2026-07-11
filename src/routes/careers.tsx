@@ -29,19 +29,19 @@ const jobs = [
   {
     title: "Highlands Fleet Manager",
     department: "Operations",
-    location: "Edinburgh / Highlands",
+    location: "Pokhara / Lakeside",
     type: "Full-Time",
-    salary: "£2,500 - £3,500 / month",
+    salary: "Rs. 45,000 - Rs. 60,000 / month",
     icon: Compass,
     description:
-      "Lead the inspection, maintenance, and staging of premium SUVs and adventure bikes for off-road Scottish Highlands expeditions.",
+      "Lead the inspection, maintenance, and staging of premium SUVs and adventure bikes for off-road Himalayan expeditions.",
   },
   {
     title: "Full Stack Software Engineer",
     department: "Engineering",
-    location: "London (Hybrid)",
+    location: "Kathmandu (Hybrid)",
     type: "Full-Time",
-    salary: "£4,500 - £6,000 / month",
+    salary: "Rs. 90,000 - Rs. 140,000 / month",
     icon: Sparkles,
     description:
       "Scale our booking system, enhance the admin dashboard tools, and build intelligent routing logic for vehicle deliveries.",
@@ -49,9 +49,9 @@ const jobs = [
   {
     title: "Customer Success Lead",
     department: "Support",
-    location: "London (Soho)",
+    location: "Kathmandu (Thamel)",
     type: "Full-Time",
-    salary: "£2,000 - £2,800 / month",
+    salary: "Rs. 35,000 - Rs. 50,000 / month",
     icon: Heart,
     description:
       "Provide exceptional, premium booking coordination and emergency road assistance support to international and local travelers.",

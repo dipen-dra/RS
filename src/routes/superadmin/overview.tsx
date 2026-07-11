@@ -61,7 +61,7 @@ function SuperAdminOverview() {
     },
     {
       label: "Revenue",
-      value: `£${(stats?.revenue ?? 0).toLocaleString()}`,
+      value: `Rs. ${(stats?.revenue ?? 0).toLocaleString()}`,
       icon: TrendingUp,
       sub: "All time",
       accent: true,

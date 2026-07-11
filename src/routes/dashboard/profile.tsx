@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -232,6 +232,18 @@ function ProfileTab() {
         )}
         {!changingPw && (
           <div className="mt-4 space-y-3 text-sm">
+            <div className="flex items-center justify-between py-2 border-b border-border mb-2">
+              <div>
+                <span className="text-foreground/80 font-medium block">Two-Factor Authentication (2FA)</span>
+                <span className="text-xs text-muted-foreground">Add an extra layer of security to your account using TOTP.</span>
+              </div>
+              <Link
+                to="/dashboard/mfa"
+                className="h-9 px-4 inline-flex items-center justify-center rounded-full border border-primary/20 text-primary text-xs font-semibold hover:bg-primary/5 transition-colors"
+              >
+                {user.mfaEnabled ? "Manage 2FA" : "Set up 2FA"}
+              </Link>
+            </div>
             <PrefRow label="Email notifications" enabled />
             <PrefRow label="SMS updates" enabled />
             <PrefRow label="Marketing emails" />

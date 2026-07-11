@@ -63,7 +63,7 @@ export function BookingTable({ rows, showActions }: { rows: Booking[]; showActio
             <td className="px-5 py-3 text-xs text-muted-foreground">
               {b.startDate} → {b.endDate}
             </td>
-            <td className="px-5 py-3 font-medium text-ink">£{b.total.toLocaleString()}</td>
+            <td className="px-5 py-3 font-medium text-ink">Rs. {b.total.toLocaleString()}</td>
             <td className="px-5 py-3">
               {showActions ? (
                 <select

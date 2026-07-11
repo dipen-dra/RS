@@ -157,7 +157,7 @@ export function CatalogPage({
                 <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3">
                   Max price{" "}
                   <span className="text-ink font-semibold ml-1">
-                    £{(priceMax === 99999 ? maxPrice : priceMax).toLocaleString()}
+                    Rs. {(priceMax === 99999 ? maxPrice : priceMax).toLocaleString()}
                   </span>
                 </p>
                 <input

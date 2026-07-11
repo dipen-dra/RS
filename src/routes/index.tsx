@@ -58,7 +58,7 @@ const faqs = [
   },
   {
     q: "Is there a security deposit?",
-    a: "Yes. Refundable deposits range from £50 to £250 depending on the vehicle category, returned within 24 hours of drop-off.",
+    a: "Yes. Refundable deposits range from Rs. 5,000 to Rs. 25,000 depending on the vehicle category, returned within 24 hours of drop-off.",
   },
   {
     q: "Can I cancel my booking?",
@@ -66,7 +66,7 @@ const faqs = [
   },
   {
     q: "Do you offer delivery?",
-    a: "Inside London and Edinburgh, we deliver free for bookings of 3+ days.",
+    a: "Inside Kathmandu and Pokhara, we deliver free for bookings of 3+ days.",
   },
   {
     q: "What if the vehicle breaks down?",
@@ -201,7 +201,7 @@ function Hero() {
             <p className="text-xs text-muted-foreground">Today's pick</p>
             <p className="font-display font-semibold text-ink mt-1">Tesla Model 3</p>
             <p className="text-primary font-bold mt-1">
-              £125 <span className="text-xs font-normal text-muted-foreground">/day</span>
+              Rs. 15,000 <span className="text-xs font-normal text-muted-foreground">/day</span>
             </p>
           </motion.div>
           <motion.div

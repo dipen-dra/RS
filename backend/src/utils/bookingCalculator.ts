@@ -17,8 +17,8 @@ interface BookingCalculationResult {
 }
 
 const PICKUP_FEE = 0;
-const DROPOFF_FEE = 10;
-const TAX_RATE = 0.2; // 20% VAT
+const DROPOFF_FEE = 1000;
+const TAX_RATE = 0.13; // 13% VAT in Nepal
 const SERVICE_FEE_RATE = 0.05; // 5% service fee
 
 const INSURANCE_PRICES: Record<string, number> = {

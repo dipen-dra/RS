@@ -135,7 +135,7 @@ router.post(
           <p>Hi ${customerName},</p>
           <p>Your booking for the <strong>${vehicle.name}</strong> has been successfully reserved with <strong>${payment}</strong>.</p>
           <p><strong>Pickup:</strong> ${new Date(startDate).toLocaleDateString()} at ${pickup}</p>
-          <p><strong>Total Due:</strong> £${total.toLocaleString()}</p>
+          <p><strong>Total Due:</strong> Rs. ${total.toLocaleString()}</p>
           <p>Please have the payment ready or confirmed upon pickup.</p>
           <p>Thank you for choosing RentalSphere!</p>
         </div>

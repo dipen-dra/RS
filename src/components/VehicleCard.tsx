@@ -36,7 +36,7 @@ export function VehicleCard({ v, index = 0 }: { v: Vehicle; index?: number }) {
             </div>
             <div className="text-right">
               <p className="font-display text-lg font-bold text-primary">
-                £{v.pricePerDay.toLocaleString()}
+                Rs. {v.pricePerDay.toLocaleString()}
               </p>
               <p className="text-[11px] text-muted-foreground">/ day</p>
             </div>

@@ -94,7 +94,7 @@ function BookingDetailsModal({ b, onClose }: { b: Booking; onClose: () => void }
                 {b.vehicleName}
               </h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Daily base rate: £{Math.round(b.subtotal / b.days).toLocaleString()} / day
+                Daily base rate: Rs. {Math.round(b.subtotal / b.days).toLocaleString()} / day
               </p>
             </div>
           </div>
@@ -175,7 +175,7 @@ function BookingDetailsModal({ b, onClose }: { b: Booking; onClose: () => void }
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Vehicle Rental (Daily rate × days)</span>
-                <span className="font-medium text-ink">£{b.subtotal.toLocaleString()}</span>
+                <span className="font-medium text-ink">Rs. {b.subtotal.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground flex items-center gap-1.5">
@@ -184,9 +184,9 @@ function BookingDetailsModal({ b, onClose }: { b: Booking; onClose: () => void }
                 </span>
                 <span className="font-medium text-ink">
                   {b.insurance === "max"
-                    ? "£10/day"
+                    ? "Rs. 1,000/day"
                     : b.insurance === "plus"
-                      ? "£5/day"
+                      ? "Rs. 500/day"
                       : "Included"}
                 </span>
               </div>
@@ -195,35 +195,35 @@ function BookingDetailsModal({ b, onClose }: { b: Booking; onClose: () => void }
                   Add-ons ({b.addons && b.addons.length > 0 ? b.addons.join(", ") : "None"})
                 </span>
                 <span className="font-medium text-ink">
-                  {b.addons && b.addons.length > 0 ? "Included in daily rate" : "£0"}
+                  {b.addons && b.addons.length > 0 ? "Included in daily rate" : "Rs. 0"}
                 </span>
               </div>
               {b.pickup !== b.dropoff && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">One-way drop-off fee</span>
-                  <span className="font-medium text-ink">£10</span>
+                  <span className="font-medium text-ink">Rs. 1,000</span>
                 </div>
               )}
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Service Fee (5%)</span>
-                <span className="font-medium text-ink">£{b.serviceFee.toLocaleString()}</span>
+                <span className="font-medium text-ink">Rs. {b.serviceFee.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">VAT (20%)</span>
-                <span className="font-medium text-ink">£{b.vat.toLocaleString()}</span>
+                <span className="text-muted-foreground">VAT (13%)</span>
+                <span className="font-medium text-ink">Rs. {b.vat.toLocaleString()}</span>
               </div>
               {b.discount > 0 && (
                 <div className="flex justify-between text-emerald-600 font-medium">
                   <span className="flex items-center gap-1.5">
                     <Tag className="h-3.5 w-3.5" /> Discount (Coupon: {b.couponCode})
                   </span>
-                  <span>- £{b.discount.toLocaleString()}</span>
+                  <span>- Rs. {b.discount.toLocaleString()}</span>
                 </div>
               )}
               <div className="pt-3 border-t border-border flex items-baseline justify-between">
                 <span className="font-bold text-ink text-base">Total Amount</span>
                 <span className="font-display text-2xl font-bold text-primary">
-                  £{b.total.toLocaleString()}
+                  Rs. {b.total.toLocaleString()}
                 </span>
               </div>
             </div>
@@ -322,7 +322,7 @@ export function BookingRow({ b }: { b: Booking }) {
             <div className="mt-3 flex items-center justify-between">
               <div className="text-sm">
                 <span className="text-muted-foreground">Total</span>{" "}
-                <span className="font-semibold text-ink">£{b.total.toLocaleString()}</span>{" "}
+                <span className="font-semibold text-ink">Rs. {b.total.toLocaleString()}</span>{" "}
                 <span className="text-xs text-muted-foreground">· {b.days}d</span>
               </div>
               <div className="flex gap-2">

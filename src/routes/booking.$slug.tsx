@@ -244,11 +244,11 @@ function BookingFlow() {
   const addonsPrice = addons
     .filter((a) => selectedAddons.has(a.id))
     .reduce((s, a) => s + a.price, 0);
-  const dropOffFee = !sameLoc && pickupLoc !== returnLoc ? 10 : 0;
+  const dropOffFee = !sameLoc && pickupLoc !== returnLoc ? 1000 : 0;
 
   const subtotal = v.pricePerDay * days + (insurancePrice + addonsPrice) * days;
   const service = Math.round(subtotal * 0.05);
-  const vat = Math.round((subtotal + dropOffFee) * 0.2);
+  const vat = Math.round((subtotal + dropOffFee) * 0.13);
   const discount = couponApplied ? Math.round(subtotal * 0.1) : 0;
   const total = subtotal + service + vat + dropOffFee - discount;
 
@@ -419,7 +419,7 @@ function BookingFlow() {
                       {v.category} · {v.transmission ?? "Auto"} · {v.seats ?? 5} seats
                     </p>
                     <p className="mt-2 font-semibold text-primary">
-                      £{v.pricePerDay.toLocaleString()}{" "}
+                      Rs. {v.pricePerDay.toLocaleString()}{" "}
                       <span className="text-xs font-normal text-muted-foreground">/ day</span>
                     </p>
                   </div>
@@ -453,7 +453,7 @@ function BookingFlow() {
                         <p className="mt-3 font-semibold text-ink">{opt.name}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">{opt.desc}</p>
                         <p className="mt-2 text-xs font-semibold text-primary">
-                          {opt.price === 0 ? "Included" : `+ £${opt.price.toLocaleString()}/day`}
+                          {opt.price === 0 ? "Included" : `+ Rs. ${opt.price.toLocaleString()}/day`}
                         </p>
                       </button>
                     );
@@ -490,7 +490,7 @@ function BookingFlow() {
                           <p className="text-xs text-muted-foreground">{a.desc}</p>
                         </div>
                         <span className="text-xs font-semibold text-primary whitespace-nowrap">
-                          + £{a.price}/day
+                          + Rs. {a.price}/day
                         </span>
                       </button>
                     );
@@ -587,7 +587,7 @@ function BookingFlow() {
                   )}
                   {!sameLoc && pickupLoc !== returnLoc && (
                     <p className="text-xs text-muted-foreground">
-                      One-way drop-off fee of £10 applies.
+                      One-way drop-off fee of Rs. 1,000 applies.
                     </p>
                   )}
                 </div>
@@ -947,7 +947,7 @@ function BookingFlow() {
                   </>
                 ) : (
                   <>
-                    {step === 3 ? `Confirm & Pay £${total.toLocaleString()}` : "Continue"}{" "}
+                    {step === 3 ? `Confirm & Pay Rs. ${total.toLocaleString()}` : "Continue"}{" "}
                     <ChevronRight className="ml-1 h-4 w-4" />
                   </>
                 )}
@@ -970,25 +970,25 @@ function BookingFlow() {
 
           <div className="mt-6 space-y-2 text-sm">
             <Row
-              k={`£${v.pricePerDay.toLocaleString()} × ${days} day${days > 1 ? "s" : ""}`}
-              v={`£${(v.pricePerDay * days).toLocaleString()}`}
+              k={`Rs. ${v.pricePerDay.toLocaleString()} × ${days} day${days > 1 ? "s" : ""}`}
+              v={`Rs. ${(v.pricePerDay * days).toLocaleString()}`}
             />
             {insurancePrice > 0 && (
-              <Row k={`Insurance × ${days}`} v={`£${(insurancePrice * days).toLocaleString()}`} />
+              <Row k={`Insurance × ${days}`} v={`Rs. ${(insurancePrice * days).toLocaleString()}`} />
             )}
             {addonsPrice > 0 && (
-              <Row k={`Add-ons × ${days}`} v={`£${(addonsPrice * days).toLocaleString()}`} />
+              <Row k={`Add-ons × ${days}`} v={`Rs. ${(addonsPrice * days).toLocaleString()}`} />
             )}
-            {dropOffFee > 0 && <Row k="One-way drop-off" v={`£${dropOffFee.toLocaleString()}`} />}
-            <Row k="Service fee" v={`£${service.toLocaleString()}`} />
-            <Row k="VAT (20%)" v={`£${vat.toLocaleString()}`} />
+            {dropOffFee > 0 && <Row k="One-way drop-off" v={`Rs. ${dropOffFee.toLocaleString()}`} />}
+            <Row k="Service fee" v={`Rs. ${service.toLocaleString()}`} />
+            <Row k="VAT (13%)" v={`Rs. ${vat.toLocaleString()}`} />
             {couponApplied && (
-              <Row k="Discount (DRIVE10)" v={`− £${discount.toLocaleString()}`} accent />
+              <Row k="Discount (DRIVE10)" v={`− Rs. ${discount.toLocaleString()}`} accent />
             )}
             <div className="pt-3 border-t border-border flex items-baseline justify-between">
               <span className="font-semibold">Total</span>
               <span className="font-display text-2xl font-bold text-ink">
-                £{total.toLocaleString()}
+                Rs. {total.toLocaleString()}
               </span>
             </div>
           </div>

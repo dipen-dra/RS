@@ -103,7 +103,7 @@ function VehiclesTab() {
                     {v.type} · {v.category}
                   </td>
                   <td className="px-5 py-3 font-medium text-ink">
-                    £{v.pricePerDay.toLocaleString()}
+                    Rs. {v.pricePerDay.toLocaleString()}
                   </td>
                   <td className="px-5 py-3">{v.location}</td>
                   <td className="px-5 py-3">

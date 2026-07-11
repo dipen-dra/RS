@@ -36,7 +36,7 @@ const faqs = [
   {
     category: "payments",
     q: "How does the security deposit work?",
-    a: "A refundable security deposit (£50 for bikes, £250 for standard SUVs) is pre-authorized on your card or paid via digital wallets during checkouts. It is fully refunded within 24 hours of returning the vehicle safely.",
+    a: "A refundable security deposit (Rs. 5,000 for bikes, Rs. 25,000 for standard SUVs) is pre-authorized on your card or paid via digital wallets during checkouts. It is fully refunded within 24 hours of returning the vehicle safely.",
   },
   {
     category: "insurance",
@@ -46,7 +46,7 @@ const faqs = [
   {
     category: "roadside",
     q: "What should I do in case of an accident or breakdown?",
-    a: "Safety first! Ensure everyone is safe. Then, immediately call our 24/7 Roadside Assistance hotline at +44 20 7946 0958. We partner with support mechanics across major UK cities to dispatch roadside support or replacements.",
+    a: "Safety first! Ensure everyone is safe. Then, immediately call our 24/7 Roadside Assistance hotline at +977 1 4224000. We partner with support mechanics across Nepal to dispatch roadside support or replacements.",
   },
 ];
 

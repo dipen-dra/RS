@@ -34,7 +34,7 @@ function DashboardOverviewTab() {
         <StatCard label="Upcoming" value={stats.upcoming} icon={Calendar} />
         <StatCard
           label="Lifetime spend"
-          value={`£${stats.spend.toLocaleString()}`}
+          value={`Rs. ${stats.spend.toLocaleString()}`}
           icon={CreditCard}
         />
       </div>

@@ -162,7 +162,7 @@ function VehicleDetail() {
           >
             <div className="flex items-baseline justify-between">
               <span className="font-display text-3xl font-bold text-primary">
-                £{v.pricePerDay.toLocaleString()}
+                Rs. {v.pricePerDay.toLocaleString()}
               </span>
               <span className="text-sm text-muted-foreground">/ day</span>
             </div>
@@ -179,30 +179,30 @@ function VehicleDetail() {
                   onChange={(e) => setPickupLocation(e.target.value)}
                   className="mt-1 w-full h-11 px-3 rounded-xl bg-muted border border-transparent focus:border-primary focus:outline-none text-sm font-medium"
                 >
-                  <option value="London — Soho hub">London (Soho hub)</option>
-                  <option value="Edinburgh — Lakeside">Edinburgh (Lakeside)</option>
-                  <option value="London — Heathrow Airport">London (Heathrow Airport)</option>
+                  <option value="Kathmandu — Thamel hub">Kathmandu (Thamel hub)</option>
+                  <option value="Pokhara — Lakeside hub">Pokhara (Lakeside hub)</option>
+                  <option value="Kathmandu — Tribhuvan Airport">Kathmandu (Tribhuvan Airport)</option>
                 </select>
               </label>
             </div>
 
             <div className="mt-6 space-y-2 text-sm">
               <Row
-                k={`£${v.pricePerDay.toLocaleString()} × ${days} day${days > 1 ? "s" : ""}`}
-                v={`£${(v.pricePerDay * days).toLocaleString()}`}
+                k={`Rs. ${v.pricePerDay.toLocaleString()} × ${days} day${days > 1 ? "s" : ""}`}
+                v={`Rs. ${(v.pricePerDay * days).toLocaleString()}`}
               />
               <Row
                 k="Service fee"
-                v={`£${Math.round(v.pricePerDay * days * 0.05).toLocaleString()}`}
+                v={`Rs. ${Math.round(v.pricePerDay * days * 0.05).toLocaleString()}`}
               />
               <Row
-                k="VAT (20%)"
-                v={`£${Math.round(v.pricePerDay * days * 0.2).toLocaleString()}`}
+                k="VAT (13%)"
+                v={`Rs. ${Math.round(v.pricePerDay * days * 0.13).toLocaleString()}`}
               />
               <div className="pt-3 border-t border-border flex items-baseline justify-between">
                 <span className="font-semibold">Total</span>
                 <span className="font-display text-2xl font-bold text-ink">
-                  £{Math.round(v.pricePerDay * days * 1.25).toLocaleString()}
+                  Rs. {Math.round(v.pricePerDay * days * 1.18).toLocaleString()}
                 </span>
               </div>
             </div>

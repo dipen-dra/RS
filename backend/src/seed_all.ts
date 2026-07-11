@@ -77,11 +77,11 @@ const queryTemplates = [
   { subject: "eSewa payment failed but money deducted", message: "I tried to pay via eSewa and the money was deducted from my wallet but booking shows as pending.", reply: null, isReplied: false },
   { subject: "Invoice for business trip", message: "I need a VAT invoice for my Tesla Model 3 rental from 15 Jan to 18 Jan for expense claims.", reply: "Your VAT invoice has been emailed to your registered address. Please check spam if not received.", isReplied: true },
   { subject: "Driving in Scotland — any restrictions?", message: "I've booked the Harley Iron 883 from Edinburgh. Are there any motorway restrictions I should know about?", reply: "No motorway restrictions for the Iron 883. Enjoy the ride! Please carry your rental agreement at all times.", isReplied: true },
-  { subject: "Wrong pickup location shown", message: "The app shows my pickup as Edinburgh but I selected London. Can this be changed before pickup?", reply: null, isReplied: false },
+  { subject: "Wrong pickup location shown", message: "The app shows my pickup as Lalitpur but I selected Kathmandu. Can this be changed before pickup?", reply: null, isReplied: false },
   { subject: "Loyalty discount not applied", message: "I've rented 5 times this year but my DRIVE10 coupon code says expired. Is there a new code?", reply: "DRIVE10 was valid through March. Our new seasonal code SUMMER15 gives 15% off — apply it at checkout!", isReplied: true },
-  { subject: "Child seat availability", message: "Do you provide child seats for the Toyota Fortuner? I'm travelling with a 4-year-old.", reply: "Yes! Select the 'Child Seat' add-on during booking (£3/day). It'll be fitted and ready on pickup.", isReplied: true },
+  { subject: "Child seat availability", message: "Do you provide child seats for the Toyota Fortuner? I'm travelling with a 4-year-old.", reply: "Yes! Select the 'Child Seat' add-on during booking (Rs. 300/day). It'll be fitted and ready on pickup.", isReplied: true },
   { subject: "App login issue after password change", message: "After resetting my password I can't log in. The app keeps saying invalid credentials.", reply: null, isReplied: false },
-  { subject: "Bike helmet included?", message: "Is a helmet provided with the Royal Enfield Himalayan rental or do I need my own?", reply: "Helmets are available as an add-on (£1.50/day). We strongly recommend selecting this for safety compliance.", isReplied: true },
+  { subject: "Bike helmet included?", message: "Is a helmet provided with the Royal Enfield Himalayan rental or do I need my own?", reply: "Helmets are available as an add-on (Rs. 150/day). We strongly recommend selecting this for safety compliance.", isReplied: true },
 ];
 
 // ── Audit log event templates ──────────────────────────────────────────────────

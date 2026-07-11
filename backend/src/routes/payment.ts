@@ -61,8 +61,8 @@ export const calculateBookingTotalLegacy = async (
 
   const subtotal = vehicle.pricePerDay * days + (insurancePrice + addonsPrice) * days;
   const serviceFee = Math.round(subtotal * 0.05);
-  const dropOffFee = dropoff && pickup && dropoff !== pickup ? 10 : 0;
-  const vat = Math.round((subtotal + dropOffFee) * 0.2);
+  const dropOffFee = dropoff && pickup && dropoff !== pickup ? 1000 : 0;
+  const vat = Math.round((subtotal + dropOffFee) * 0.13);
   const discount = couponCode === "DRIVE10" ? Math.round(subtotal * 0.1) : 0;
   const total = subtotal + serviceFee + vat + dropOffFee - discount;
 
@@ -279,7 +279,7 @@ router.post("/khalti/verify", protect, async (req: AuthRequest, res: Response): 
           <p>Hi ${bookingData.customerName},</p>
           <p>Your booking for the <strong>${vehicle.name}</strong> has been confirmed and paid via Khalti.</p>
           <p><strong>Pickup:</strong> ${new Date(bookingData.startDate).toLocaleDateString()} at ${bookingData.pickup}</p>
-          <p><strong>Total Paid:</strong> £${total.toLocaleString()}</p>
+          <p><strong>Total Paid:</strong> Rs. ${total.toLocaleString()}</p>
           <p>Thank you for choosing RentalSphere!</p>
         </div>
       `,
@@ -473,7 +473,7 @@ router.get("/esewa/verify", async (req, res): Promise<void> => {
             <p>Hi ${bookingData.customerName},</p>
             <p>Your booking for the <strong>${vehicle.name}</strong> has been successfully confirmed and paid.</p>
             <p><strong>Pickup:</strong> ${new Date(bookingData.startDate).toLocaleDateString()} at ${bookingData.pickup}</p>
-            <p><strong>Total Paid:</strong> £${total.toLocaleString()}</p>
+            <p><strong>Total Paid:</strong> Rs. ${total.toLocaleString()}</p>
             <p>Thank you for choosing RentalSphere!</p>
           </div>
         `,
