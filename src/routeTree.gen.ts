@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SuperadminRouteImport } from './routes/superadmin'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -28,9 +29,13 @@ import { Route as BikesRouteImport } from './routes/bikes'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SuperadminIndexRouteImport } from './routes/superadmin/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as VehiclesSlugRouteImport } from './routes/vehicles.$slug'
+import { Route as SuperadminUsersRouteImport } from './routes/superadmin/users'
+import { Route as SuperadminSecurityLogsRouteImport } from './routes/superadmin/security-logs'
+import { Route as SuperadminOverviewRouteImport } from './routes/superadmin/overview'
 import { Route as DashboardQueriesRouteImport } from './routes/dashboard/queries'
 import { Route as DashboardProfileRouteImport } from './routes/dashboard/profile'
 import { Route as DashboardOverviewRouteImport } from './routes/dashboard/overview'
@@ -51,6 +56,11 @@ import { Route as PaymentEsewaFailureRouteImport } from './routes/payment/esewa/
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuperadminRoute = SuperadminRouteImport.update({
+  id: '/superadmin',
+  path: '/superadmin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -143,6 +153,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SuperadminIndexRoute = SuperadminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SuperadminRoute,
+} as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -157,6 +172,21 @@ const VehiclesSlugRoute = VehiclesSlugRouteImport.update({
   id: '/vehicles/$slug',
   path: '/vehicles/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const SuperadminUsersRoute = SuperadminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => SuperadminRoute,
+} as any)
+const SuperadminSecurityLogsRoute = SuperadminSecurityLogsRouteImport.update({
+  id: '/security-logs',
+  path: '/security-logs',
+  getParentRoute: () => SuperadminRoute,
+} as any)
+const SuperadminOverviewRoute = SuperadminOverviewRouteImport.update({
+  id: '/overview',
+  path: '/overview',
+  getParentRoute: () => SuperadminRoute,
 } as any)
 const DashboardQueriesRoute = DashboardQueriesRouteImport.update({
   id: '/queries',
@@ -258,6 +288,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/superadmin': typeof SuperadminRouteWithChildren
   '/terms': typeof TermsRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/overview': typeof AdminOverviewRoute
@@ -271,9 +302,13 @@ export interface FileRoutesByFullPath {
   '/dashboard/overview': typeof DashboardOverviewRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/queries': typeof DashboardQueriesRoute
+  '/superadmin/overview': typeof SuperadminOverviewRoute
+  '/superadmin/security-logs': typeof SuperadminSecurityLogsRoute
+  '/superadmin/users': typeof SuperadminUsersRoute
   '/vehicles/$slug': typeof VehiclesSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/superadmin/': typeof SuperadminIndexRoute
   '/payment/esewa/failure': typeof PaymentEsewaFailureRoute
   '/payment/esewa/success': typeof PaymentEsewaSuccessRoute
   '/payment/khalti/failure': typeof PaymentKhaltiFailureRoute
@@ -309,9 +344,13 @@ export interface FileRoutesByTo {
   '/dashboard/overview': typeof DashboardOverviewRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/queries': typeof DashboardQueriesRoute
+  '/superadmin/overview': typeof SuperadminOverviewRoute
+  '/superadmin/security-logs': typeof SuperadminSecurityLogsRoute
+  '/superadmin/users': typeof SuperadminUsersRoute
   '/vehicles/$slug': typeof VehiclesSlugRoute
   '/admin': typeof AdminIndexRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/superadmin': typeof SuperadminIndexRoute
   '/payment/esewa/failure': typeof PaymentEsewaFailureRoute
   '/payment/esewa/success': typeof PaymentEsewaSuccessRoute
   '/payment/khalti/failure': typeof PaymentKhaltiFailureRoute
@@ -337,6 +376,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/superadmin': typeof SuperadminRouteWithChildren
   '/terms': typeof TermsRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/overview': typeof AdminOverviewRoute
@@ -350,9 +390,13 @@ export interface FileRoutesById {
   '/dashboard/overview': typeof DashboardOverviewRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/queries': typeof DashboardQueriesRoute
+  '/superadmin/overview': typeof SuperadminOverviewRoute
+  '/superadmin/security-logs': typeof SuperadminSecurityLogsRoute
+  '/superadmin/users': typeof SuperadminUsersRoute
   '/vehicles/$slug': typeof VehiclesSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/superadmin/': typeof SuperadminIndexRoute
   '/payment/esewa/failure': typeof PaymentEsewaFailureRoute
   '/payment/esewa/success': typeof PaymentEsewaSuccessRoute
   '/payment/khalti/failure': typeof PaymentKhaltiFailureRoute
@@ -379,6 +423,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/reset-password'
     | '/signup'
+    | '/superadmin'
     | '/terms'
     | '/admin/bookings'
     | '/admin/overview'
@@ -392,9 +437,13 @@ export interface FileRouteTypes {
     | '/dashboard/overview'
     | '/dashboard/profile'
     | '/dashboard/queries'
+    | '/superadmin/overview'
+    | '/superadmin/security-logs'
+    | '/superadmin/users'
     | '/vehicles/$slug'
     | '/admin/'
     | '/dashboard/'
+    | '/superadmin/'
     | '/payment/esewa/failure'
     | '/payment/esewa/success'
     | '/payment/khalti/failure'
@@ -430,9 +479,13 @@ export interface FileRouteTypes {
     | '/dashboard/overview'
     | '/dashboard/profile'
     | '/dashboard/queries'
+    | '/superadmin/overview'
+    | '/superadmin/security-logs'
+    | '/superadmin/users'
     | '/vehicles/$slug'
     | '/admin'
     | '/dashboard'
+    | '/superadmin'
     | '/payment/esewa/failure'
     | '/payment/esewa/success'
     | '/payment/khalti/failure'
@@ -457,6 +510,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/reset-password'
     | '/signup'
+    | '/superadmin'
     | '/terms'
     | '/admin/bookings'
     | '/admin/overview'
@@ -470,9 +524,13 @@ export interface FileRouteTypes {
     | '/dashboard/overview'
     | '/dashboard/profile'
     | '/dashboard/queries'
+    | '/superadmin/overview'
+    | '/superadmin/security-logs'
+    | '/superadmin/users'
     | '/vehicles/$slug'
     | '/admin/'
     | '/dashboard/'
+    | '/superadmin/'
     | '/payment/esewa/failure'
     | '/payment/esewa/success'
     | '/payment/khalti/failure'
@@ -498,6 +556,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  SuperadminRoute: typeof SuperadminRouteWithChildren
   TermsRoute: typeof TermsRoute
   BookingSlugRoute: typeof BookingSlugRoute
   VehiclesSlugRoute: typeof VehiclesSlugRoute
@@ -514,6 +573,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/superadmin': {
+      id: '/superadmin'
+      path: '/superadmin'
+      fullPath: '/superadmin'
+      preLoaderRoute: typeof SuperadminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -642,6 +708,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/superadmin/': {
+      id: '/superadmin/'
+      path: '/'
+      fullPath: '/superadmin/'
+      preLoaderRoute: typeof SuperadminIndexRouteImport
+      parentRoute: typeof SuperadminRoute
+    }
     '/dashboard/': {
       id: '/dashboard/'
       path: '/'
@@ -662,6 +735,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/vehicles/$slug'
       preLoaderRoute: typeof VehiclesSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/superadmin/users': {
+      id: '/superadmin/users'
+      path: '/users'
+      fullPath: '/superadmin/users'
+      preLoaderRoute: typeof SuperadminUsersRouteImport
+      parentRoute: typeof SuperadminRoute
+    }
+    '/superadmin/security-logs': {
+      id: '/superadmin/security-logs'
+      path: '/security-logs'
+      fullPath: '/superadmin/security-logs'
+      preLoaderRoute: typeof SuperadminSecurityLogsRouteImport
+      parentRoute: typeof SuperadminRoute
+    }
+    '/superadmin/overview': {
+      id: '/superadmin/overview'
+      path: '/overview'
+      fullPath: '/superadmin/overview'
+      preLoaderRoute: typeof SuperadminOverviewRouteImport
+      parentRoute: typeof SuperadminRoute
     }
     '/dashboard/queries': {
       id: '/dashboard/queries'
@@ -822,6 +916,24 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
   DashboardRouteChildren,
 )
 
+interface SuperadminRouteChildren {
+  SuperadminOverviewRoute: typeof SuperadminOverviewRoute
+  SuperadminSecurityLogsRoute: typeof SuperadminSecurityLogsRoute
+  SuperadminUsersRoute: typeof SuperadminUsersRoute
+  SuperadminIndexRoute: typeof SuperadminIndexRoute
+}
+
+const SuperadminRouteChildren: SuperadminRouteChildren = {
+  SuperadminOverviewRoute: SuperadminOverviewRoute,
+  SuperadminSecurityLogsRoute: SuperadminSecurityLogsRoute,
+  SuperadminUsersRoute: SuperadminUsersRoute,
+  SuperadminIndexRoute: SuperadminIndexRoute,
+}
+
+const SuperadminRouteWithChildren = SuperadminRoute._addFileChildren(
+  SuperadminRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -841,6 +953,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  SuperadminRoute: SuperadminRouteWithChildren,
   TermsRoute: TermsRoute,
   BookingSlugRoute: BookingSlugRoute,
   VehiclesSlugRoute: VehiclesSlugRoute,

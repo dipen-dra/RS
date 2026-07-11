@@ -139,11 +139,10 @@ async function seed() {
       console.log(`  ℹ️  ${acc.role} already exists — skipping`);
       continue;
     }
-    const hash = await bcrypt.hash(acc.password, 12);
     const u = await User.create({
       name: acc.name,
       email: acc.email,
-      password: hash,
+      password: acc.password,  // pre-save hook will hash this
       role: acc.role,
       phone: acc.phone,
       city: acc.city,
@@ -161,11 +160,10 @@ async function seed() {
   for (const eu of extraUsers) {
     let u = await User.findOne({ email: eu.email });
     if (!u) {
-      const hash = await bcrypt.hash(eu.password, 12);
       u = await User.create({
         name: eu.name,
         email: eu.email,
-        password: hash,
+        password: eu.password,  // pre-save hook will hash this
         role: "user",
         phone: eu.phone,
         city: eu.city,

@@ -65,7 +65,10 @@ export async function redirectIfLoggedIn() {
   if (typeof window === "undefined") return;
   try {
     const res = await getMe();
-    if (["admin", "superadmin"].includes(res.user.role)) {
+    if (res.user.role === "superadmin") {
+      throw redirect({ to: "/superadmin" });
+    }
+    if (res.user.role === "admin") {
       throw redirect({ to: "/admin" });
     }
     throw redirect({ to: "/dashboard" });

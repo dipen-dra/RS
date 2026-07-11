@@ -1,7 +1,7 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Bell, Menu, X, LayoutDashboard, LogOut, Shield } from "lucide-react";
+import { Bell, Menu, X, LayoutDashboard, LogOut, Shield, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationCenter } from "@/components/NotificationCenter";
@@ -113,7 +113,15 @@ export function Navbar() {
             </div>
           ) : isAuthenticated && user ? (
             <>
-              {user.role === "admin" ? (
+              {user.role === "superadmin" ? (
+                <Link
+                  to="/superadmin"
+                  className="hidden md:inline-flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted text-foreground/70 transition-colors"
+                  aria-label="Super Admin Console"
+                >
+                  <Crown className="h-4 w-4 text-amber-500" />
+                </Link>
+              ) : user.role === "admin" ? (
                 <Link
                   to="/admin"
                   className="hidden md:inline-flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted text-foreground/70 transition-colors"
@@ -174,6 +182,15 @@ export function Navbar() {
                       >
                         <LayoutDashboard className="h-3.5 w-3.5" /> Dashboard
                       </Link>
+                      {user.role === "superadmin" && (
+                        <Link
+                          to="/superadmin"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-lg hover:bg-muted transition-colors"
+                        >
+                          <Crown className="h-3.5 w-3.5 text-amber-500" /> Super Admin Panel
+                        </Link>
+                      )}
                       {user.role === "admin" && (
                         <Link
                           to="/admin"
@@ -259,10 +276,10 @@ export function Navbar() {
             ) : isAuthenticated && user ? (
               <div className="mt-8 flex gap-3">
                 <Link
-                  to={user.role === "admin" ? "/admin" : "/dashboard"}
+                  to={user.role === "superadmin" ? "/superadmin" : user.role === "admin" ? "/admin" : "/dashboard"}
                   className="flex-1 h-11 inline-flex items-center justify-center rounded-full border border-border text-sm font-medium"
                 >
-                  {user.role === "admin" ? "Admin Console" : "Dashboard"}
+                  {user.role === "superadmin" ? "Super Admin" : user.role === "admin" ? "Admin Console" : "Dashboard"}
                 </Link>
                 <ConfirmModal
                   title="Log out"

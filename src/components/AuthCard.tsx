@@ -65,7 +65,9 @@ export function AuthCard({
         }
         toast.success("Successfully logged in!");
         const user = result as any;
-        if (user.role === "admin") {
+        if (user.role === "superadmin") {
+          void navigate({ to: "/superadmin" });
+        } else if (user.role === "admin") {
           void navigate({ to: "/admin" });
         } else {
           void navigate({ to: "/dashboard" });
@@ -97,7 +99,9 @@ export function AuthCard({
         setUser(res.user);
         clearMfaPending();
         toast.success("Logged in with MFA!");
-        if (res.user.role === "admin") {
+        if (res.user.role === "superadmin") {
+          void navigate({ to: "/superadmin" });
+        } else if (res.user.role === "admin") {
           void navigate({ to: "/admin" });
         } else {
           void navigate({ to: "/dashboard" });
@@ -120,7 +124,9 @@ export function AuthCard({
       if (credentialResponse.credential) {
         const user = await googleSignIn(credentialResponse.credential);
         toast.success("Google Sign-In successful!");
-        if (user.role === "admin") {
+        if (user.role === "superadmin") {
+          void navigate({ to: "/superadmin" });
+        } else if (user.role === "admin") {
           void navigate({ to: "/admin" });
         } else {
           void navigate({ to: "/dashboard" });

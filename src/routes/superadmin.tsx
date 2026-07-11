@@ -1,34 +1,32 @@
 import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { BarChart3, Car, Users, Calendar, Shield, Mail } from "lucide-react";
-import { requireAdmin } from "@/lib/guards";
+import { BarChart3, Users, ShieldAlert, Crown, Home, Settings } from "lucide-react";
+import { requireSuperAdmin } from "@/lib/guards";
 import { useAuth } from "@/lib/auth-context";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin — RentalSphere" }] }),
-  beforeLoad: requireAdmin,
-  component: AdminLayout,
+export const Route = createFileRoute("/superadmin")({
+  head: () => ({ meta: [{ title: "Super Admin — RentalSphere" }] }),
+  beforeLoad: requireSuperAdmin,
+  component: SuperAdminLayout,
 });
 
 const tabs = [
-  { id: "overview",  label: "Overview",  icon: BarChart3,  path: "/admin/overview" },
-  { id: "vehicles",  label: "Vehicles",  icon: Car,        path: "/admin/vehicles" },
-  { id: "bookings",  label: "Bookings",  icon: Calendar,   path: "/admin/bookings" },
-  { id: "users",     label: "Users",     icon: Users,      path: "/admin/users" },
-  { id: "queries",   label: "Queries",   icon: Mail,       path: "/admin/queries" },
+  { id: "overview",      label: "Overview",       icon: BarChart3,   path: "/superadmin/overview" },
+  { id: "users",         label: "User Management",icon: Users,        path: "/superadmin/users" },
+  { id: "security-logs", label: "Security Logs",  icon: ShieldAlert,  path: "/superadmin/security-logs" },
 ] as const;
 
-function AdminLayout() {
+function SuperAdminLayout() {
   const { user } = useAuth();
   const location = useLocation();
 
-  if (!user || !["admin", "superadmin"].includes(user.role)) {
+  if (!user || user.role !== "superadmin") {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Shield className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-          <h1 className="font-display text-2xl font-bold text-ink">Admin access required</h1>
+          <Crown className="h-12 w-12 mx-auto text-amber-500/50 mb-4" />
+          <h1 className="font-display text-2xl font-bold text-ink">Super Admin access required</h1>
           <p className="mt-2 text-muted-foreground">You don't have permission to view this page.</p>
           <Link
             to="/"
@@ -44,28 +42,38 @@ function AdminLayout() {
   return (
     <div className="min-h-screen bg-surface/50">
       <div className="container-page py-10">
+        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl gradient-brand text-white shadow-[var(--shadow-glow)]">
-              <Shield className="h-5 w-5" />
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500 text-white shadow-[0_0_20px_rgba(245,158,11,0.35)]">
+              <Crown className="h-5 w-5" />
             </span>
             <div>
               <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">
-                Admin Console
+                Super Admin Console
               </h1>
               <p className="text-xs text-muted-foreground">
-                Manage fleet, bookings, and customers
+                Full system control — security, users, audit logs
               </p>
             </div>
           </div>
-          <Link
-            to="/"
-            className="hidden md:inline-flex h-10 px-4 items-center rounded-full text-sm border border-border hover:bg-muted"
-          >
-            View site
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/admin"
+              className="hidden md:inline-flex h-10 px-4 items-center gap-2 rounded-full text-sm border border-border hover:bg-muted transition-colors"
+            >
+              <Settings className="h-4 w-4" /> Admin Panel
+            </Link>
+            <Link
+              to="/"
+              className="hidden md:inline-flex h-10 px-4 items-center gap-2 rounded-full text-sm border border-border hover:bg-muted transition-colors"
+            >
+              <Home className="h-4 w-4" /> View site
+            </Link>
+          </div>
         </div>
 
+        {/* Tabs */}
         <div className="flex gap-2 mb-6 border-b border-border overflow-x-auto">
           {tabs.map((t) => {
             const Icon = t.icon;
@@ -76,15 +84,15 @@ function AdminLayout() {
                 to={t.path}
                 className={cn(
                   "relative px-4 py-3 inline-flex items-center gap-2 text-sm font-medium whitespace-nowrap transition-colors",
-                  active ? "text-primary" : "text-foreground/60 hover:text-foreground",
+                  active ? "text-amber-500" : "text-foreground/60 hover:text-foreground",
                 )}
               >
                 <Icon className="h-4 w-4" />
                 {t.label}
                 {active && (
                   <motion.span
-                    layoutId="admin-tab"
-                    className="absolute -bottom-px left-0 right-0 h-0.5 bg-primary"
+                    layoutId="superadmin-tab"
+                    className="absolute -bottom-px left-0 right-0 h-0.5 bg-amber-500"
                   />
                 )}
               </Link>
