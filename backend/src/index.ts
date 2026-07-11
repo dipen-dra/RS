@@ -87,7 +87,14 @@ app.use((_req, res) => {
 });
 
 // Global error handler
-app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  if (err.name === "MulterError" || err.code === "LIMIT_FILE_SIZE") {
+    const message = err.code === "LIMIT_FILE_SIZE" 
+      ? "File is too large. Maximum allowed size is 5MB." 
+      : `Upload error: ${err.message}`;
+    res.status(400).json({ success: false, message });
+    return;
+  }
   console.error("❌ Unhandled error:", err);
   res.status(500).json({ success: false, message: "Internal server error." });
 });
