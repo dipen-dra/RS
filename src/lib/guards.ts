@@ -24,12 +24,15 @@ export async function requireAuth({ location }: { location: { href: string } }) 
   }
 }
 
-/** Requires admin OR superadmin role. Redirects to / if not. */
+/** Requires admin role. Redirects superadmin to /superadmin, others to / if not. */
 export async function requireAdmin({ location }: { location: { href: string } }) {
   if (typeof window === "undefined") return { user: null };
   try {
     const res = await getMe();
-    if (!["admin", "superadmin"].includes(res.user.role)) {
+    if (res.user.role === "superadmin") {
+      throw redirect({ to: "/superadmin" });
+    }
+    if (res.user.role !== "admin") {
       throw redirect({ to: "/" });
     }
     return { user: res.user };
@@ -42,13 +45,16 @@ export async function requireAdmin({ location }: { location: { href: string } })
   }
 }
 
-/** Requires superadmin role. Redirects to /admin if not. */
+/** Requires superadmin role. Redirects admin to /admin, others to / if not. */
 export async function requireSuperAdmin({ location }: { location: { href: string } }) {
   if (typeof window === "undefined") return { user: null };
   try {
     const res = await getMe();
-    if (res.user.role !== "superadmin") {
+    if (res.user.role === "admin") {
       throw redirect({ to: "/admin" });
+    }
+    if (res.user.role !== "superadmin") {
+      throw redirect({ to: "/" });
     }
     return { user: res.user };
   } catch (err) {

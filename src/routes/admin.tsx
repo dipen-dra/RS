@@ -22,7 +22,7 @@ function AdminLayout() {
   const { user } = useAuth();
   const location = useLocation();
 
-  if (!user || !["admin", "superadmin"].includes(user.role)) {
+  if (!user || user.role !== "admin") {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
