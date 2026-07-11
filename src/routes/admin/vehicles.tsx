@@ -307,10 +307,43 @@ function VehicleModal({
                 type="file"
                 accept="image/*"
                 multiple
-                onChange={(e) => setGalleryFiles(Array.from(e.target.files || []))}
+                onChange={(e) => {
+                  const selected = Array.from(e.target.files || []);
+                  setGalleryFiles((prev) => {
+                    const combined = [...prev, ...selected];
+                    if (combined.length > 5) {
+                      toast.error("You can upload a maximum of 5 gallery images.");
+                      return combined.slice(0, 5);
+                    }
+                    return combined;
+                  });
+                  // Reset input element value so same files can be re-selected if needed
+                  e.target.value = "";
+                }}
                 className="mt-1 w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
               />
             </label>
+            {galleryFiles.length > 0 && (
+              <div className="mt-2.5 flex flex-wrap gap-2">
+                {galleryFiles.map((file, idx) => (
+                  <div
+                    key={idx}
+                    className="inline-flex items-center gap-1.5 p-1.5 px-3 rounded-full bg-primary/10 text-primary text-xs font-semibold border border-primary/20"
+                  >
+                    <span className="truncate max-w-[150px]">{file.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setGalleryFiles((prev) => prev.filter((_, i) => i !== idx));
+                      }}
+                      className="h-4 w-4 bg-primary/20 hover:bg-destructive text-primary hover:text-white rounded-full flex items-center justify-center transition-colors"
+                    >
+                      <X className="h-2.5 w-2.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div className="sm:col-span-2">
             <F label="Features (comma-separated)" k="features" />
