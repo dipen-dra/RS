@@ -16,7 +16,7 @@ const ipFailureCount = new Map<string, { count: number; windowStart: number }>()
 
 const IP_FAIL_THRESHOLD = 20; // block after 20 auth failures from same IP
 const IP_FAIL_WINDOW_MS = 60 * 60 * 1000; // within 1 hour
-const IP_BLOCK_DURATION_MS = 60 * 60 * 1000; // block for 1 hour
+const IP_BLOCK_DURATION_MS = 10 * 1000; // block for 10 seconds (temporary for testing)
 
 /**
  * Record a failed auth attempt for an IP
