@@ -32,6 +32,10 @@ const allowedOrigins = process.env.NODE_ENV === "production"
       "http://localhost:3000",
       "http://localhost:5173",
       "http://localhost:5174",
+      "http://127.0.0.1:5173",
+      "http://127.0.0.1:5174",
+      "http://192.168.1.102:5173",  // LAN IP — allows Burp Suite interception
+      "http://192.168.1.102:5174",
     ];
 
 app.use(
@@ -92,11 +96,20 @@ app.use((_req, res) => {
 
 // Global error handler
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  // Catch size errors
   if (err.name === "MulterError" || err.code === "LIMIT_FILE_SIZE") {
     const message = err.code === "LIMIT_FILE_SIZE" 
       ? "File is too large. Maximum allowed size is 5MB." 
       : `Upload error: ${err.message}`;
     res.status(400).json({ success: false, message });
+    return;
+  }
+  // Catch format/extension errors from Cloudinary/Multer
+  if (err.message && (err.message.toLowerCase().includes("format") || err.message.toLowerCase().includes("allowed"))) {
+    res.status(400).json({ 
+      success: false, 
+      message: "Invalid file format. Only JPEG, JPG, PNG, and WEBP are allowed." 
+    });
     return;
   }
   console.error("❌ Unhandled error:", err);
