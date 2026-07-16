@@ -45,104 +45,108 @@ router.post(
       return;
     }
 
-    const {
-      vehicleSlug,
-      startDate,
-      endDate,
-      pickup,
-      dropoff,
-      payment,
-      customerName,
-      customerEmail,
-      customerPhone,
-      license,
-      couponCode,
-      insurance,
-      addons,
-    } = req.body as {
-      vehicleSlug: string;
-      startDate: string;
-      endDate: string;
-      pickup: string;
-      dropoff?: string;
-      payment: "Khalti" | "eSewa" | "Cash";
-      customerName: string;
-      customerEmail: string;
-      customerPhone: string;
-      license: string;
-      couponCode?: string;
-      insurance?: string;
-      addons?: string[];
-    };
-
-    const { total, vehicle, days, subtotal, serviceFee, vat, dropOffFee, discount } =
-      await calculateBookingTotalLegacy(
+    try {
+      const {
         vehicleSlug,
         startDate,
         endDate,
-        couponCode,
-        dropoff,
         pickup,
+        dropoff,
+        payment,
+        customerName,
+        customerEmail,
+        customerPhone,
+        license,
+        couponCode,
         insurance,
         addons,
-      );
+      } = req.body as {
+        vehicleSlug: string;
+        startDate: string;
+        endDate: string;
+        pickup: string;
+        dropoff?: string;
+        payment: "Khalti" | "eSewa" | "Cash";
+        customerName: string;
+        customerEmail: string;
+        customerPhone: string;
+        license: string;
+        couponCode?: string;
+        insurance?: string;
+        addons?: string[];
+      };
 
-    const booking = await Booking.create({
-      user: req.user!._id,
-      vehicle: vehicle._id,
-      vehicleName: vehicle.name,
-      vehicleImage: vehicle.image,
-      vehicleSlug: vehicle.slug,
-      pickup,
-      dropoff: dropoff || pickup,
-      startDate,
-      endDate,
-      days,
-      subtotal,
-      serviceFee,
-      vat,
-      discount,
-      total,
-      insurance,
-      addons,
-      status: "upcoming",
-      payment,
-      customerName,
-      customerEmail,
-      customerPhone,
-      license,
-      couponCode,
-      calculatedTotal: total,
-      serverValidated: true,
-    });
+      const { total, vehicle, days, subtotal, serviceFee, vat, dropOffFee, discount } =
+        await calculateBookingTotalLegacy(
+          vehicleSlug,
+          startDate,
+          endDate,
+          couponCode,
+          dropoff,
+          pickup,
+          insurance,
+          addons,
+        );
 
-    // Fire & forget notification creation
-    Notification.create({
-      user: req.user!._id,
-      type: "booking",
-      title: "Booking Confirmed!",
-      body: `Your booking for ${vehicle.name} has been reserved with Cash payment.`,
-      href: "/dashboard",
-    }).catch(console.error);
+      const booking = await Booking.create({
+        user: req.user!._id,
+        vehicle: vehicle._id,
+        vehicleName: vehicle.name,
+        vehicleImage: vehicle.image,
+        vehicleSlug: vehicle.slug,
+        pickup,
+        dropoff: dropoff || pickup,
+        startDate,
+        endDate,
+        days,
+        subtotal,
+        serviceFee,
+        vat,
+        discount,
+        total,
+        insurance,
+        addons,
+        status: "upcoming",
+        payment,
+        customerName,
+        customerEmail,
+        customerPhone,
+        license,
+        couponCode,
+        calculatedTotal: total,
+        serverValidated: true,
+      });
 
-    // Send confirmation email
-    sendEmail({
-      to: customerEmail,
-      subject: `Booking Confirmed: ${vehicle.name}`,
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>Booking Confirmed!</h2>
-          <p>Hi ${customerName},</p>
-          <p>Your booking for the <strong>${vehicle.name}</strong> has been successfully reserved with <strong>${payment}</strong>.</p>
-          <p><strong>Pickup:</strong> ${new Date(startDate).toLocaleDateString()} at ${pickup}</p>
-          <p><strong>Total Due:</strong> Rs. ${total.toLocaleString()}</p>
-          <p>Please have the payment ready or confirmed upon pickup.</p>
-          <p>Thank you for choosing RentalSphere!</p>
-        </div>
-      `,
-    }).catch(console.error);
+      // Fire & forget notification creation
+      Notification.create({
+        user: req.user!._id,
+        type: "booking",
+        title: "Booking Confirmed!",
+        body: `Your booking for ${vehicle.name} has been reserved with Cash payment.`,
+        href: "/dashboard",
+      }).catch(console.error);
 
-    res.status(201).json({ success: true, data: booking });
+      // Send confirmation email
+      sendEmail({
+        to: customerEmail,
+        subject: `Booking Confirmed: ${vehicle.name}`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>Booking Confirmed!</h2>
+            <p>Hi ${customerName},</p>
+            <p>Your booking for the <strong>${vehicle.name}</strong> has been successfully reserved with <strong>${payment}</strong>.</p>
+            <p><strong>Pickup:</strong> ${new Date(startDate).toLocaleDateString()} at ${pickup}</p>
+            <p><strong>Total Due:</strong> Rs. ${total.toLocaleString()}</p>
+            <p>Please have the payment ready or confirmed upon pickup.</p>
+            <p>Thank you for choosing RentalSphere!</p>
+          </div>
+        `,
+      }).catch(console.error);
+
+      res.status(201).json({ success: true, data: booking });
+    } catch (err: any) {
+      res.status(400).json({ success: false, message: err.message || "Failed to create booking" });
+    }
   },
 );
 
