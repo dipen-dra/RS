@@ -25,14 +25,18 @@ const clientOrigin = CLIENT_URL.replace(/\/$/, "");
 setupSecurityMiddleware(app);
 
 // ── Middleware ─────────────────────────────────────────────
-app.use(
-  cors({
-    origin: [
+const allowedOrigins = process.env.NODE_ENV === "production"
+  ? [clientOrigin]
+  : [
       clientOrigin,
       "http://localhost:3000",
       "http://localhost:5173",
       "http://localhost:5174",
-    ],
+    ];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
     credentials: true,
   }),
 );
