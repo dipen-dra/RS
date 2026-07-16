@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Mail,
   Lock,
@@ -11,13 +11,13 @@ import {
   CheckCircle2,
   ShieldCheck,
   X,
+  RefreshCw,
 } from "lucide-react";
 import { useNavigate, Link, useSearch } from "@tanstack/react-router";
 import { GoogleLogin } from "@react-oauth/google";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
-import { ApiError } from "@/lib/api";
-import { mfaValidate } from "@/lib/api";
+import { ApiError, mfaValidate, getCaptcha } from "@/lib/api";
 import { PasswordStrength } from "@/components/PasswordStrength";
 import logo from "@/assets/logo.png";
 import heroVehicles from "@/assets/hero-vehicles.jpg";
@@ -47,6 +47,28 @@ export function AuthCard({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  // CAPTCHA state
+  const [captchaSvg, setCaptchaSvg] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaAnswer, setCaptchaAnswer] = useState("");
+
+  const fetchCaptcha = async () => {
+    try {
+      const res = await getCaptcha();
+      setCaptchaSvg(res.captchaSvg);
+      setCaptchaToken(res.captchaToken);
+      setCaptchaAnswer("");
+    } catch (err) {
+      console.error("Failed to load CAPTCHA", err);
+    }
+  };
+
+  useEffect(() => {
+    if (mode === "signup") {
+      fetchCaptcha();
+    }
+  }, [mode]);
+
   // MFA step state
   const [mfaToken, setMfaToken] = useState("");
   const [mfaLoading, setMfaLoading] = useState(false);
@@ -73,11 +95,14 @@ export function AuthCard({
           void navigate({ to: "/dashboard" });
         }
       } else {
-        await signup(name, email, password);
+        await signup(name, email, password, captchaAnswer, captchaToken);
         toast.success("Account created successfully!");
         void navigate({ to: "/login", search: { registered: true } });
       }
     } catch (err) {
+      if (mode === "signup") {
+        fetchCaptcha();
+      }
       if (err instanceof ApiError) {
         setError(err.errors?.[0]?.msg ?? err.message);
       } else {
@@ -326,6 +351,35 @@ export function AuthCard({
                   </button>
                 </Field>
                 {mode === "signup" && <PasswordStrength password={password} showRequirements={true} />}
+
+                {mode === "signup" && captchaSvg && (
+                  <div className="space-y-2">
+                    <div className="flex gap-2 items-center">
+                      <div
+                        className="rounded-xl border border-border bg-white flex items-center justify-center p-1 select-none h-10 w-36 overflow-hidden [&>svg]:h-full [&>svg]:w-full"
+                        dangerouslySetInnerHTML={{ __html: captchaSvg }}
+                      />
+                      <button
+                        type="button"
+                        onClick={fetchCaptcha}
+                        className="h-10 w-10 flex items-center justify-center border border-border hover:border-primary text-muted-foreground hover:text-primary rounded-xl transition-all"
+                        title="Refresh CAPTCHA"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <Field label="Enter CAPTCHA Code" icon={<ShieldCheck className="h-4 w-4" />}>
+                      <input
+                        type="text"
+                        value={captchaAnswer}
+                        onChange={(e) => setCaptchaAnswer(e.target.value)}
+                        placeholder="CAPTCHA Answer"
+                        required
+                        className="w-full bg-transparent text-sm font-medium focus:outline-none"
+                      />
+                    </Field>
+                  </div>
+                )}
 
                 {mode === "login" && (
                   <div className="flex items-center justify-between text-xs">

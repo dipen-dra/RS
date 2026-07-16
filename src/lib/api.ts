@@ -149,10 +149,19 @@ export const loginUser = (email: string, password: string) =>
     body: JSON.stringify({ email, password }),
   });
 
-export const registerUser = (name: string, email: string, password: string) =>
+export const getCaptcha = () =>
+  request<{ success: boolean; captchaSvg: string; captchaToken: string }>("/auth/captcha");
+
+export const registerUser = (
+  name: string,
+  email: string,
+  password: string,
+  captchaAnswer: string,
+  captchaToken: string,
+) =>
   request<AuthResponse>("/auth/register", {
     method: "POST",
-    body: JSON.stringify({ name, email, password }),
+    body: JSON.stringify({ name, email, password, captchaAnswer, captchaToken }),
   });
 
 export const googleLogin = (credential: string) =>

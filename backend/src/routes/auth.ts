@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { body, validationResult } from "express-validator";
 import { OAuth2Client } from "google-auth-library";
+// @ts-ignore
+import svgCaptcha from "svg-captcha";
 import { User } from "../models/User.js";
 import { protect, AuthRequest } from "../middleware/auth.js";
 import { sendEmail } from "../utils/email.js";
@@ -32,6 +34,29 @@ const sendTokenCookie = (res: Response, token: string): void => {
   });
 };
 
+/* ── GET /api/auth/captcha ───────────────────────────────── */
+router.get("/captcha", (req: Request, res: Response) => {
+  const captcha = svgCaptcha.create({
+    size: 5,
+    noise: 2,
+    color: true,
+    background: "#f8fafc"
+  });
+
+  const secret = process.env.JWT_SECRET || "fallback_secret";
+  const token = jwt.sign(
+    { text: captcha.text.toLowerCase() },
+    secret,
+    { expiresIn: "5m" }
+  );
+
+  res.json({
+    success: true,
+    captchaSvg: captcha.data,
+    captchaToken: token
+  });
+});
+
 /* ── POST /api/auth/register ─────────────────────────────── */
 router.post(
   "/register",
@@ -43,6 +68,8 @@ router.post(
       .withMessage("Password must be at least 10 characters")
       .custom((value) => isStrongPassword(value))
       .withMessage("Password must contain uppercase, lowercase, numbers, and special characters"),
+    body("captchaAnswer").trim().notEmpty().withMessage("CAPTCHA answer is required"),
+    body("captchaToken").trim().notEmpty().withMessage("CAPTCHA token is required")
   ],
   async (req: Request, res: Response): Promise<void> => {
     const errors = validationResult(req);
@@ -51,7 +78,26 @@ router.post(
       return;
     }
 
-    const { name, email, password } = req.body as { name: string; email: string; password: string };
+    const { name, email, password, captchaAnswer, captchaToken } = req.body as {
+      name: string;
+      email: string;
+      password: string;
+      captchaAnswer: string;
+      captchaToken: string;
+    };
+
+    // Verify stateless CAPTCHA
+    try {
+      const secret = process.env.JWT_SECRET || "fallback_secret";
+      const decoded = jwt.verify(captchaToken, secret) as { text: string };
+      if (captchaAnswer.toLowerCase() !== decoded.text) {
+        res.status(400).json({ success: false, message: "Incorrect CAPTCHA. Please try again." });
+        return;
+      }
+    } catch (err) {
+      res.status(400).json({ success: false, message: "CAPTCHA expired or invalid. Please refresh CAPTCHA." });
+      return;
+    }
 
     // Validate password strength with detailed feedback
     const passwordValidation = validatePasswordStrength(password);
