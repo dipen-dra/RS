@@ -22,10 +22,11 @@ export default defineConfig({
     tailwindcss(),
   ],
   server: {
+    host: "0.0.0.0",  // bind to all interfaces — allows access via LAN IP (e.g. for Burp)
     port: 5173,
     proxy: {
       "/api": {
-        target: "http://localhost:5001",
+        target: "http://127.0.0.1:5001",
         changeOrigin: true,
         secure: false,
       },

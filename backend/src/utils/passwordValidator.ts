@@ -20,28 +20,24 @@ export const validatePasswordStrength = (password: string): PasswordStrengthResu
   } else {
     strengthScore++;
   }
-
   // Check for uppercase letters
   if (!/[A-Z]/.test(password)) {
     feedback.push("Password must contain at least one uppercase letter (A-Z)");
   } else {
     strengthScore++;
   }
-
   // Check for lowercase letters
   if (!/[a-z]/.test(password)) {
     feedback.push("Password must contain at least one lowercase letter (a-z)");
   } else {
     strengthScore++;
   }
-
   // Check for numbers
   if (!/[0-9]/.test(password)) {
     feedback.push("Password must contain at least one number (0-9)");
   } else {
     strengthScore++;
   }
-
   // Check for special characters
   if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
     feedback.push("Password must contain at least one special character (!@#$%^&*...)");
